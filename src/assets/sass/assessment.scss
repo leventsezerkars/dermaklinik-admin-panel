@@ -1,0 +1,20 @@
+
+.btn-assessment {
+    border-color: #e64949 !important;
+    background-color: #e64949 !important;
+    color: #fff !important;
+    &:hover {
+        background-color: #e78686 !important;
+      }
+  }
+
+.selected {
+    .btn {
+        background-color: #009EF7  !important;
+    }
+    &:hover {
+        .btn {
+            background-color: #F1FAFF  !important;
+        }
+    }
+}
