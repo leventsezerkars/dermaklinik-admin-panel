@@ -219,13 +219,13 @@ const getData = async (type = "default") => {
           total: 0,
         });
 
-        return exportData.list;
+        return exportData.data;
       } else {
         let items = await props.items(pagination.value);
         if (items == undefined || items.length == 0) {
-          items = { list: [] };
+          items = { data: [] };
         }
-        tableData.value.splice(0, tableData.value.length, ...items.list);
+        tableData.value.splice(0, tableData.value.length, ...items.data);
         if (!props.noPagination) {
           pagination.value.total = items.totalCount;
         }

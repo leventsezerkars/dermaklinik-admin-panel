@@ -64,6 +64,12 @@
       <KTNotificationsMenu></KTNotificationsMenu>
     </div> -->
 
+    <!--begin::Language Selector-->
+    <!-- <div class="d-flex align-items-center ms-1 ms-lg-3">
+      <LanguageSelector />
+    </div> -->
+    <!--end::Language Selector-->
+
     <!--begin::User-->
     <div
       class="d-flex align-items-center ms-1 ms-lg-3"
@@ -107,6 +113,7 @@
 import { defineComponent } from "vue";
 import KTUserMenu from "@/layout/header/partials/UserMenu.vue";
 import NameInitials from "@/components/question-note/NameInitials.vue";
+// import LanguageSelector from "@/components/LanguageSelector.vue";
 import JwtService from "@/core/services/JwtService";
 
 export default defineComponent({
@@ -114,9 +121,10 @@ export default defineComponent({
   components: {
     KTUserMenu,
     NameInitials,
+    // LanguageSelector,
   },
   setup() {
-    const userName = JwtService.getUserName();
+    const userName = JwtService.getUserName() || "";
 
     return {
       userName,

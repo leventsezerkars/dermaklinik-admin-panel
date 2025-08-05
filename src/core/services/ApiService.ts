@@ -11,6 +11,7 @@ export interface ApiResponse<T = unknown> {
   statusCode?: string;
   list?: Array<T>;
   entity?: T;
+  data?: any;
   totalCount?: number;
   hasNext?: boolean;
 }
@@ -58,6 +59,19 @@ class ApiService {
 
     if (token) {
       conf.headers["Authorization"] = `Bearer ${token}`;
+    }
+
+    // Dil header'ı ekle
+    const selectedLanguage = localStorage.getItem("selectedLanguage");
+    if (selectedLanguage) {
+      try {
+        const language = JSON.parse(selectedLanguage);
+        if (language.code) {
+          conf.headers["Accept-Language"] = language.code;
+        }
+      } catch (error) {
+        console.error("Dil bilgisi parse edilemedi:", error);
+      }
     }
 
     return config;

@@ -21,42 +21,8 @@
         </router-link>
       </div>
       <div class="menu-item me-lg-1">
-        <router-link class="menu-link" to="/database" active-class="active">
-          <span class="menu-title">Veritabanı Listesi</span>
-        </router-link>
-      </div>
-      <div class="menu-item me-lg-1">
-        <router-link class="menu-link" to="/company" active-class="active">
-          <span class="menu-title">Şirket Listesi</span>
-        </router-link>
-      </div>
-      <div class="menu-item me-lg-1">
-        <router-link class="menu-link" to="/restourant" active-class="active">
-          <span class="menu-title">Restoran Listesi</span>
-        </router-link>
-      </div>
-      <div class="menu-item me-lg-1">
-        <router-link class="menu-link" to="/istatistik" active-class="active">
-          <span class="menu-title">Restoran Istatistiği</span>
-        </router-link>
-      </div>
-      <div class="menu-item me-lg-1">
-        <router-link
-          class="menu-link"
-          to="/istatistik_company"
-          active-class="active"
-        >
-          <span class="menu-title">Şirket İstatistiği</span>
-        </router-link>
-      </div>
-      <div class="menu-item me-lg-1">
-        <router-link class="menu-link" to="/income" active-class="active">
-          <span class="menu-title">Ödemeler</span>
-        </router-link>
-      </div>
-      <div class="menu-item me-lg-1">
-        <router-link class="menu-link" to="/settings" active-class="active">
-          <span class="menu-title">Ayarlar</span>
+        <router-link class="menu-link" to="/menu" active-class="active">
+          <span class="menu-title">Menü Yönetimi</span>
         </router-link>
       </div>
     </div>

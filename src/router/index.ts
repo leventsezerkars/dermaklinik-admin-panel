@@ -67,6 +67,11 @@ const routes: Array<RouteRecordRaw> = [
         name: "admin-setting",
         component: () => import("@/views/pages/SettingsPage.vue"),
       },
+      {
+        path: "/menu",
+        name: "menu-list",
+        component: () => import("@/views/pages/MenuList.vue"),
+      },
     ],
   },
   {

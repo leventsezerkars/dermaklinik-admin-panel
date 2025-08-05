@@ -122,6 +122,9 @@ export default defineComponent({
         router.push({ name: "sign-in" });
       }
 
+      // Language store'u başlat
+      store.dispatch("LanguageModule/initializeLanguage");
+
       // const permission = await UserService.getAuthenticatedUserPermissions();
       // if (permission.result) {
       //   PermissionService.save(permission.list as any);

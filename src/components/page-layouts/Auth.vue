@@ -11,7 +11,7 @@
           src="media/logos/logo.png"
           class="text-center h-100px"
         />
-        <h1 class="text-center mt-3">Pizza Order Control</h1>
+        <h1 class="text-center mt-3">Deratoloji Kliniği Web Control</h1>
       </a>
       <!--end::Logo-->
 

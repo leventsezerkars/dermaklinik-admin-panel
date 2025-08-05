@@ -1,7 +1,9 @@
 <template>
   <editor
-    id="uuid"
+    :id="editorId"
     api-key="w52wlaxcrgfkp9oz9pp0ejhki1l0mcz123p6f4aamooh5vmk"
+    :model-value="$props.modelValue"
+    @update:model-value="(value) => $emit('update:modelValue', value)"
     :init="{
       height: sizeComp,
       menubar: 'insert format table',
@@ -27,6 +29,7 @@
         customButtons +
         ' |fullscreen print' +
         '| preview code codesample help',
+      selector: `#${editorId.value}`,
       relative_urls: false,
       remove_script_host: true,
       images_reuse_filename: true,
@@ -38,7 +41,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed } from "vue";
+import { defineComponent, computed, ref } from "vue";
 import Editor from "@tinymce/tinymce-vue";
 
 export default defineComponent({
@@ -47,6 +50,10 @@ export default defineComponent({
     Editor,
   },
   props: {
+    modelValue: {
+      type: String,
+      default: "",
+    },
     size: {
       type: String as () => "small" | "medium" | "large",
       default: "medium",
@@ -59,7 +66,10 @@ export default defineComponent({
       type: Object,
     },
   },
-  setup(props) {
+  emits: ["update:modelValue"],
+  setup(props, { emit }) {
+    const editorId = ref(`tinymce-${Math.random().toString(36).substr(2, 9)}`);
+
     const sizeComp = computed<number>(() => {
       return props.size == "small"
         ? 250
@@ -70,7 +80,7 @@ export default defineComponent({
         : 500;
     });
 
-    return { sizeComp };
+    return { sizeComp, editorId };
   },
 });
 </script>
