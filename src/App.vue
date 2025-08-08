@@ -19,7 +19,6 @@ export default defineComponent({
        * remove this to use config only from static config (@/core/config/DefaultLayoutConfig.ts)
        */
       store.commit(Mutations.OVERRIDE_LAYOUT_CONFIG);
-      store.dispatch(Actions.SET_COUNTRY_INFO_ACTION);
       nextTick(() => {
         initializeComponents();
       });

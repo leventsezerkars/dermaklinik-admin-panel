@@ -12,14 +12,12 @@ enum Actions {
   UPDATE_USER = "updateUser",
   FORGOT_PASSWORD = "forgotPassword",
   SET_BREADCRUMB_ACTION = "setBreadcrumbAction",
-  SET_COUNTRY_INFO_ACTION = "setCountryInfoAction",
 }
 
 enum Mutations {
   // mutation types
   SET_CLASSNAME_BY_POSITION = "appendBreadcrumb",
   PURGE_AUTH = "logOut",
-  SET_COUNTRY_INFO = "setCountryInfo",
   SET_AUTH = "setAuth",
   SET_USER = "setUser",
   SET_PASSWORD = "setPassword",

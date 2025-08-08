@@ -21,6 +21,11 @@
         </router-link>
       </div>
       <div class="menu-item me-lg-1">
+        <router-link class="menu-link" to="/company-info" active-class="active">
+          <span class="menu-title">Şirket Yönetimi</span>
+        </router-link>
+      </div>
+      <div class="menu-item me-lg-1">
         <router-link class="menu-link" to="/menu" active-class="active">
           <span class="menu-title">Menü Yönetimi</span>
         </router-link>

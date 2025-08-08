@@ -72,6 +72,11 @@ const routes: Array<RouteRecordRaw> = [
         name: "menu-list",
         component: () => import("@/views/pages/MenuList.vue"),
       },
+      {
+        path: "/company-info",
+        name: "company-info",
+        component: () => import("@/views/pages/CompanyInfo.vue"),
+      },
     ],
   },
   {
@@ -81,7 +86,7 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: "/sign-in",
         name: "sign-in",
-        component: () => import("@/views/authentication/SignIn.vue"),
+        component: () => import("@/views/authentication/SignInTest.vue"),
       },
       {
         path: "/sign-up",
@@ -112,21 +117,32 @@ const router = createRouter({
   routes,
 });
 
-router.beforeEach((to, from) => {
+router.beforeEach(async (to, from) => {
   // reset config to initial state
   store.commit(Mutations.RESET_LAYOUT_CONFIG);
 
-  store.dispatch(Actions.VERIFY_AUTH, { api_token: JwtService.getToken() });
+  // Authentication kontrolü
+  const token = JwtService.getToken();
+  const isAuthenticated = store.getters.isUserAuthenticated;
 
-  // if (to.meta && to.meta.permission) {
-  //   // const hasPermission = PermissionService.hasPermission(
-  //   //   to.meta.permission as string
-  //   // );
+  // Eğer token varsa ama store'da authentication yoksa, verify et
+  if (token && !isAuthenticated) {
+    await store.dispatch(Actions.VERIFY_AUTH, { api_token: token });
+  }
 
-  //   // if (!hasPermission) {
-  //   //   router.push({ name: "restricted" });
-  //   // }
-  // }
+  // Public routes (giriş yapmadan erişilebilir)
+  const publicRoutes = ["sign-in", "sign-up", "404", "500"];
+
+  // Eğer public route değilse ve authentication yoksa, giriş sayfasına yönlendir
+  if (!publicRoutes.includes(to.name as string) && !isAuthenticated) {
+    return { name: "sign-in" };
+  }
+
+  // Eğer giriş yapmış kullanıcı sign-in sayfasına gitmeye çalışıyorsa, dashboard'a yönlendir
+  if (to.name === "sign-in" && isAuthenticated) {
+    return { name: "dashboard" };
+  }
+
   // Scroll page to top on every route change
   setTimeout(() => {
     window.scrollTo(0, 0);

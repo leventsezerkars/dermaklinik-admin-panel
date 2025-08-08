@@ -13,17 +13,17 @@
       </div>
 
       <div class="fv-row mb-10">
-        <label class="form-label fs-6 fw-bolder text-dark">Email</label>
+        <label class="form-label fs-6 fw-bolder text-dark">Kullanıcı Adı</label>
 
         <Field
           class="form-control form-control-lg form-control-solid"
           type="text"
-          name="email"
+          name="username"
           autocomplete="off"
         />
         <div class="fv-plugins-message-container">
           <div class="fv-help-block">
-            <ErrorMessage name="email" />
+            <ErrorMessage name="username" />
           </div>
         </div>
       </div>
@@ -98,10 +98,9 @@ export default defineComponent({
     const submitButton = ref<HTMLButtonElement | null>(null);
 
     const login = Yup.object().shape({
-      email: Yup.string()
-        .email("Lütfen geçerli email giriniz")
-        .required("Lütfen geçerli email giriniz")
-        .label("Email"),
+      username: Yup.string()
+        .required("Lütfen kullanıcı adınızı giriniz")
+        .label("Kullanıcı Adı"),
       password: Yup.string()
         .required("Lütfen şifrenizi giriniz")
         .label("Şifre"),
@@ -117,21 +116,35 @@ export default defineComponent({
         submitButton.value.setAttribute("data-kt-indicator", "on");
       }
 
-      await store.dispatch(Actions.LOGIN, {
-        flow: "password",
-        email: values.email,
-        password: values.password,
-      });
+      try {
+        await store.dispatch(Actions.LOGIN, {
+          flow: "password",
+          email: values.username, // username'i email olarak gönder (AuthenticationService'de dönüştürülüyor)
+          password: values.password,
+        });
 
-      const [errorName] = Object.keys(store.getters.getErrors);
-      const error = store.getters.getErrors[errorName];
+        const [errorName] = Object.keys(store.getters.getErrors);
+        const error = store.getters.getErrors[errorName];
 
-      if (!error) {
-        //await LogService.authlog({});
-        router.push({ name: "dashboard" });
-      } else {
+        if (!error) {
+          //await LogService.authlog({});
+          // Başarılı giriş sonrası dashboard'a yönlendir
+          router.push({ name: "dashboard" });
+        } else {
+          Swal.fire({
+            text: error,
+            icon: "error",
+            buttonsStyling: false,
+            confirmButtonText: "Tekrar dene!",
+            customClass: {
+              confirmButton: "btn fw-bold btn-light-danger",
+            },
+          });
+        }
+      } catch (error) {
+        console.error("Giriş hatası:", error);
         Swal.fire({
-          text: error,
+          text: "Giriş sırasında hata oluştu",
           icon: "error",
           buttonsStyling: false,
           confirmButtonText: "Tekrar dene!",
@@ -139,11 +152,11 @@ export default defineComponent({
             confirmButton: "btn fw-bold btn-light-danger",
           },
         });
+      } finally {
+        submitButton.value?.removeAttribute("data-kt-indicator");
+        // eslint-disable-next-line
+        submitButton.value!.disabled = false;
       }
-
-      submitButton.value?.removeAttribute("data-kt-indicator");
-      // eslint-disable-next-line
-      submitButton.value!.disabled = false;
     };
 
     return {

@@ -125,6 +125,9 @@ export default defineComponent({
       // Language store'u başlat
       store.dispatch("LanguageModule/initializeLanguage");
 
+      // Şirket bilgilerini yükle
+      store.dispatch("CompanyInfoModule/fetchCompanyInfo");
+
       // const permission = await UserService.getAuthenticatedUserPermissions();
       // if (permission.result) {
       //   PermissionService.save(permission.list as any);

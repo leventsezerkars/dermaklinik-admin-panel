@@ -17,16 +17,10 @@ export interface User {
   type: string;
 }
 
-export interface CountryInfo {
-  code: string;
-  currencySymbol: string;
-}
-
 export interface UserAuthInfo {
   errors: unknown;
   user: User;
   isAuthenticated: boolean;
-  countryInfo: CountryInfo;
 }
 
 @Module
@@ -34,7 +28,6 @@ export default class AuthModule extends VuexModule implements UserAuthInfo {
   errors = {};
   user = {} as User;
   isAuthenticated = !!JwtService.getToken();
-  countryInfo = {} as CountryInfo;
 
   /**
    * Get current user object
@@ -43,9 +36,7 @@ export default class AuthModule extends VuexModule implements UserAuthInfo {
   get currentUser(): User {
     return this.user;
   }
-  get currentCountryInfo(): CountryInfo {
-    return this.countryInfo;
-  }
+
   /**
    * Verify user authentication
    * @returns boolean
@@ -60,11 +51,6 @@ export default class AuthModule extends VuexModule implements UserAuthInfo {
    */
   get getErrors() {
     return this.errors;
-  }
-
-  @Mutation
-  [Mutations.SET_COUNTRY_INFO](info) {
-    this.countryInfo = { ...info };
   }
 
   @Mutation
@@ -93,11 +79,6 @@ export default class AuthModule extends VuexModule implements UserAuthInfo {
     JwtService.destroyUser();
   }
 
-  @Action
-  async [Actions.SET_COUNTRY_INFO_ACTION]() {
-    const info = await ApiService.get("/company/getCountryDetail");
-    this.context.commit(Mutations.SET_COUNTRY_INFO, info.data.entity);
-  }
   @Action
   async [Actions.LOGIN](credentials: AuthenticationCredentials) {
     const service = new AuthenticationService();

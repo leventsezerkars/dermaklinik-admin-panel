@@ -25,7 +25,7 @@ class ApiService {
    */
   private static service: AxiosInstance;
   private static _config: AxiosRequestConfig = {
-    baseURL: process.env.VUE_APP_API_URL,
+    baseURL: "https://localhost:7078",
     timeout: 30000,
   };
   /**

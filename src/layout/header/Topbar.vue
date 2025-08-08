@@ -1,6 +1,23 @@
 <template>
   <!--begin::Toolbar wrapper-->
   <div class="d-flex align-items-stretch flex-shrink-0">
+    <!--begin::Company Logo-->
+    <div class="d-flex align-items-center me-3">
+      <div class="company-logo-wrapper">
+        <img
+          v-if="companyLogoUrl"
+          :src="companyLogoUrl"
+          alt="Şirket Logosu"
+          class="company-logo"
+        />
+        <div v-else class="company-logo-placeholder">
+          <span class="svg-icon svg-icon-2">
+            <inline-svg src="media/icons/duotune/general/gen025.svg" />
+          </span>
+        </div>
+      </div>
+    </div>
+    <!--end::Company Logo-->
     <!--begin::Search-->
     <!-- <div class="d-flex align-items-stretch ms-1 ms-lg-3">
       <KTSearch></KTSearch>
@@ -110,7 +127,8 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, computed } from "vue";
+import { useStore } from "vuex";
 import KTUserMenu from "@/layout/header/partials/UserMenu.vue";
 import NameInitials from "@/components/question-note/NameInitials.vue";
 // import LanguageSelector from "@/components/LanguageSelector.vue";
@@ -124,11 +142,48 @@ export default defineComponent({
     // LanguageSelector,
   },
   setup() {
+    const store = useStore();
     const userName = JwtService.getUserName() || "";
+
+    const companyLogoUrl = computed(() => {
+      return store.getters["CompanyInfoModule/logoUrl"];
+    });
 
     return {
       userName,
+      companyLogoUrl,
     };
   },
 });
 </script>
+
+<style scoped>
+.company-logo-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: #f5f8fa;
+  border: 1px solid #e1e3ea;
+}
+
+.company-logo {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.company-logo-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  color: #a1a5b7;
+}
+</style>
