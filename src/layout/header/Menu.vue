@@ -30,6 +30,25 @@
           <span class="menu-title">Menü Yönetimi</span>
         </router-link>
       </div>
+      <div class="menu-item me-lg-1">
+        <router-link
+          class="menu-link"
+          to="/blog-categories"
+          active-class="active"
+        >
+          <span class="menu-title">Blog Kategori Yönetimi</span>
+        </router-link>
+      </div>
+      <div class="menu-item me-lg-1">
+        <router-link class="menu-link" to="/blogs" active-class="active">
+          <span class="menu-title">Blog Yönetimi</span>
+        </router-link>
+      </div>
+      <div class="menu-item me-lg-1">
+        <router-link class="menu-link" to="/gallery" active-class="active">
+          <span class="menu-title">Galeri Yönetimi</span>
+        </router-link>
+      </div>
     </div>
   </Drawer>
   <!--end::Menu wrapper-->

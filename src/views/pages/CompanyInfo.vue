@@ -1,12 +1,21 @@
 <template>
   <div class="card">
     <div class="card-header border-0 pt-5">
-      <h3 class="card-title align-items-start flex-column">
-        <span class="card-label fw-bold fs-3 mb-1">Şirket Bilgileri</span>
-        <span class="text-muted mt-1 fw-semibold fs-7"
-          >Şirket bilgilerini düzenleyin</span
-        >
-      </h3>
+      <div class="d-flex justify-content-between align-items-center">
+        <h3 class="card-title align-items-start flex-column">
+          <span class="card-label fw-bold fs-3 mb-1">
+            {{
+              companyInfo.id
+                ? "Şirket Bilgilerini Güncelle"
+                : "Yeni Şirket Bilgileri"
+            }}
+          </span>
+          <span class="text-muted mt-1 fw-semibold fs-7"
+            >Şirket bilgilerini düzenleyin</span
+          >
+        </h3>
+        <div class="card-toolbar"></div>
+      </div>
     </div>
 
     <div class="card-body">
@@ -15,12 +24,12 @@
           <!-- Logo Upload -->
           <div class="col-12 mb-5">
             <div class="d-flex align-items-center">
-              <div class="symbol symbol-100px me-5">
+              <div class="symbol symbol-120px me-5 logo-preview-container">
                 <img
                   v-if="companyInfo.logoUrl"
                   :src="companyInfo.logoUrl"
                   alt="Şirket Logosu"
-                  class="w-100 h-100 object-fit-cover"
+                  class="logo-preview-image"
                 />
                 <div
                   v-else
@@ -51,7 +60,8 @@
                 </div>
                 <div class="form-text">
                   Logo favicon ve header kısmında kullanılacaktır. Önerilen
-                  boyut: 200x200px
+                  boyut: 200x200px. Daha büyük resimler önizlemede 120x120px
+                  olarak gösterilecek ancak orijinal boyutları korunacaktır.
                 </div>
               </div>
             </div>
@@ -230,7 +240,13 @@
               v-if="loading"
               class="spinner-border spinner-border-sm me-2"
             ></span>
-            {{ loading ? "Kaydediliyor..." : "Kaydet" }}
+            {{
+              loading
+                ? "Kaydediliyor..."
+                : companyInfo.id
+                ? "Güncelle"
+                : "Kaydet"
+            }}
           </button>
         </div>
       </form>
@@ -254,6 +270,7 @@ const formRef = ref<HTMLFormElement>();
 
 // Şirket bilgileri modeli
 const companyInfo = reactive<CompanyInfoDto>({
+  id: "",
   isActive: true,
   isDeleted: false,
   name: "",
@@ -306,6 +323,37 @@ const removeLogo = () => {
   SwalAlert.toast("Logo kaldırıldı", "info");
 };
 
+const createNewCompany = () => {
+  // Form'u temizle ve yeni kayıt için hazırla
+  Object.assign(companyInfo, {
+    id: "",
+    isActive: true,
+    isDeleted: false,
+    name: "",
+    address: "",
+    phone: "",
+    email: "",
+    logoUrl: "",
+    facebook: "",
+    twitter: "",
+    instagram: "",
+    linkedIn: "",
+    googleMapsUrl: "",
+    googleAnalyticsCode: "",
+    metaTitle: "",
+    metaDescription: "",
+    metaKeywords: "",
+    workingHours: "",
+  });
+
+  // Logo input'unu temizle
+  if (logoInput.value) {
+    logoInput.value.value = "";
+  }
+
+  SwalAlert.toast("Yeni şirket bilgileri formu hazırlandı", "info");
+};
+
 // Store'dan şirket bilgilerini al
 const storeCompanyInfo = computed(
   () => store.getters["CompanyInfoModule/companyInfo"]
@@ -322,6 +370,11 @@ const loadCompanyInfo = async () => {
     if (companyData) {
       // Mevcut veriyi form'a yükle
       Object.assign(companyInfo, companyData);
+    } else {
+      // Veri yoksa yeni form göster (id alanı boş kalacak)
+      console.log(
+        "Mevcut şirket bilgisi bulunamadı, yeni kayıt formu gösteriliyor"
+      );
     }
   } catch (error) {
     console.error("Şirket bilgileri yüklenirken hata:", error);
@@ -336,11 +389,31 @@ const saveCompanyInfo = async () => {
   try {
     loading.value = true;
 
-    // Store üzerinden güncelle
-    const updatedCompanyInfo = await store.dispatch(
-      "CompanyInfoModule/updateCompanyInfo",
-      companyInfo
-    );
+    let updatedCompanyInfo;
+
+    if (companyInfo.id) {
+      // Güncelleme işlemi
+      updatedCompanyInfo = await store.dispatch(
+        "CompanyInfoModule/updateCompanyInfo",
+        companyInfo
+      );
+    } else {
+      // Yeni kayıt oluşturma
+      const {
+        id,
+        createdAt,
+        createdById,
+        updatedAt,
+        updatedById,
+        creator,
+        updater,
+        ...createData
+      } = companyInfo;
+      updatedCompanyInfo = await store.dispatch(
+        "CompanyInfoModule/createCompanyInfo",
+        createData
+      );
+    }
 
     if (updatedCompanyInfo) {
       SwalAlert.toast("Şirket bilgileri başarıyla kaydedildi", "success");
@@ -381,5 +454,26 @@ onMounted(() => {
 .form-control-solid:focus {
   background-color: #ffffff;
   border-color: #009ef7;
+}
+
+.logo-preview-container {
+  width: 120px !important; /* Fixed width for the container */
+  height: 120px !important; /* Fixed height for the container */
+  min-width: 120px !important; /* Prevent shrinking */
+  min-height: 120px !important; /* Prevent shrinking */
+  max-width: 120px !important; /* Prevent expanding */
+  max-height: 120px !important; /* Prevent expanding */
+  overflow: hidden; /* Hide overflow to ensure image fits */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo-preview-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Cover the container while maintaining aspect ratio */
+  max-width: 120px; /* Ensure image doesn't exceed container */
+  max-height: 120px; /* Ensure image doesn't exceed container */
 }
 </style>

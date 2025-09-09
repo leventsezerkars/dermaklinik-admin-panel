@@ -15,6 +15,12 @@ const DocMenuConfig = [
         svgIcon: "media/icons/duotune/general/gen025.svg",
         fontIcon: "bi-building",
       },
+      {
+        heading: "Galeri",
+        route: "/gallery",
+        svgIcon: "media/icons/duotune/files/fil008.svg",
+        fontIcon: "bi-images",
+      },
     ],
   },
 ];

@@ -189,7 +189,7 @@ export default class CompanyInfoService {
     model: UpdateCompanyInfoDto
   ): Promise<ApiResponse<CompanyInfoDto>> {
     const result = await ApiService.put<CompanyInfoDto>(
-      "/api/CompanyInfo",
+      `/api/CompanyInfo/${model.id}`,
       model
     );
     return result.data;

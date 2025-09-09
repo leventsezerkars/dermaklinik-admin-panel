@@ -111,6 +111,26 @@ const CompanyInfoModule: Module<CompanyInfoState, any> = {
       }
     },
 
+    async createCompanyInfo({ commit, dispatch }, companyInfo: any) {
+      try {
+        commit("SET_LOADING", true);
+
+        const response = await CompanyInfoService.create(companyInfo);
+
+        if (response.result && response.data) {
+          commit("SET_COMPANY_INFO", response.data);
+          commit("SET_LAST_FETCH", Date.now());
+          return response.data;
+        }
+        return null;
+      } catch (error) {
+        console.error("Şirket bilgileri oluşturulurken hata:", error);
+        throw error;
+      } finally {
+        commit("SET_LOADING", false);
+      }
+    },
+
     clearCompanyInfo({ commit }) {
       commit("SET_COMPANY_INFO", null);
       commit("SET_LAST_FETCH", null);

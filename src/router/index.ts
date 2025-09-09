@@ -14,58 +14,7 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: "/dashboard",
         name: "dashboard",
-        component: () => import("@/views/Dashboard.vue"),
-      },
-      {
-        path: "/restricted",
-        name: "restricted",
-        component: () => import("@/views/RestrictedPage.vue"),
-      },
-      {
-        path: "/company",
-        name: "company-list",
-        component: () => import("@/views/pages/CompanyList.vue"),
-      },
-      {
-        path: "/database",
-        name: "database-list",
-        component: () => import("@/views/pages/DatabaseList.vue"),
-      },
-      {
-        path: "/restourant",
-        name: "restourant-list",
-        component: () => import("@/views/pages/RestourantList.vue"),
-      },
-      {
-        path: "/order/:id",
-        name: "order-list",
-        component: () => import("@/views/pages/OrderList.vue"),
-      },
-      {
-        path: "/income",
-        name: "income-list",
-        component: () => import("@/views/pages/IncomeList.vue"),
-        props: { companyId: null, allDatas: true },
-      },
-      {
-        path: "/invoice/:id",
-        name: "invoice-create",
-        component: () => import("@/views/pages/CreateInvoice.vue"),
-      },
-      {
-        path: "/istatistik",
-        name: "restourant-istatistik",
-        component: () => import("@/views/pages/RestourantIstatistik.vue"),
-      },
-      {
-        path: "/istatistik_company",
-        name: "company-istatistik",
-        component: () => import("@/views/pages/CompanyIstatistik.vue"),
-      },
-      {
-        path: "/settings",
-        name: "admin-setting",
-        component: () => import("@/views/pages/SettingsPage.vue"),
+        component: () => import("@/views/pages/CompanyInfo.vue"),
       },
       {
         path: "/menu",
@@ -73,9 +22,24 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import("@/views/pages/MenuList.vue"),
       },
       {
+        path: "/blog-categories",
+        name: "blog-categories",
+        component: () => import("@/views/pages/BlogCategoryList.vue"),
+      },
+      {
+        path: "/blogs",
+        name: "blog-list",
+        component: () => import("@/views/pages/BlogList.vue"),
+      },
+      {
         path: "/company-info",
         name: "company-info",
         component: () => import("@/views/pages/CompanyInfo.vue"),
+      },
+      {
+        path: "/gallery",
+        name: "gallery-page",
+        component: () => import("@/views/pages/GalleryPage.vue"),
       },
     ],
   },

@@ -35,6 +35,35 @@ export const validateAndConvertLogo = async (
     throw new Error(`Dosya boyutu ${maxSizeMB}MB'dan büyük olamaz`);
   }
 
+  // Resim boyut kontrolü (opsiyonel - sadece bilgi amaçlı)
+  if (file.type.startsWith("image/")) {
+    const img = new Image();
+    const objectUrl = URL.createObjectURL(file);
+
+    return new Promise((resolve, reject) => {
+      img.onload = () => {
+        URL.revokeObjectURL(objectUrl);
+
+        // Resim boyutu bilgisi (sadece log için)
+        if (img.width > 200 || img.height > 200) {
+          console.info(
+            `Logo boyutu: ${img.width}x${img.height}px. Önizlemede 120x120px olarak gösterilecek.`
+          );
+        }
+
+        // Base64'e çevir
+        fileToBase64(file).then(resolve).catch(reject);
+      };
+
+      img.onerror = () => {
+        URL.revokeObjectURL(objectUrl);
+        reject(new Error("Resim yüklenirken hata oluştu"));
+      };
+
+      img.src = objectUrl;
+    });
+  }
+
   // Base64'e çevir
   return await fileToBase64(file);
 };
