@@ -46,10 +46,13 @@ app.directive("click-outside", {
         binding.value(event, el);
       }
     };
-    document.body.addEventListener("click", el.clickOutsideEvent);
+    // Event listener'ı capture phase'de ekle
+    document.body.addEventListener("click", el.clickOutsideEvent, true);
   },
   unmounted(el) {
-    document.body.removeEventListener("click", el.clickOutsideEvent);
+    if (el.clickOutsideEvent) {
+      document.body.removeEventListener("click", el.clickOutsideEvent, true);
+    }
   },
 });
 
