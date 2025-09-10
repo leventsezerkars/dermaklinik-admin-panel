@@ -40,9 +40,7 @@
                         @update:model-value="handleChange"
                       >
                         <el-option key="0" label="Sayfa" :value="0" />
-                        <el-option key="1" label="Link" :value="1" />
-                        <el-option key="2" label="Content" :value="2" />
-                        <el-option key="3" label="Kapça" :value="3" />
+                        <el-option key="2" label="Kapça" :value="2" />
                       </el-select>
                     </Field>
                     <div class="fv-plugins-message-container">
@@ -71,24 +69,7 @@
               </div>
 
               <div class="row mb-8">
-                <div class="col-6">
-                  <div class="fv-row mb-7">
-                    <label class="fs-6 fw-bold mb-2">Hedef URL</label>
-                    <Field
-                      name="target"
-                      v-model="menuModel.target"
-                      type="text"
-                      class="form-control"
-                      placeholder="https://example.com"
-                    />
-                    <div class="fv-plugins-message-container">
-                      <div class="fv-help-block">
-                        <ErrorMessage name="target" />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div class="col-6">
+                <div class="col-12">
                   <div class="fv-row mb-7">
                     <label class="fs-6 fw-bold mb-2">Üst Menü</label>
                     <Field
@@ -105,9 +86,9 @@
                         clearable
                       >
                         <el-option
-                          v-for="menu in parentMenus"
+                          v-for="menu in sortedParentMenus"
                           :key="menu.id"
-                          :label="getMenuTitle(menu)"
+                          :label="getMenuTitleWithLevel(menu)"
                           :value="menu.id"
                         />
                       </el-select>
@@ -142,10 +123,17 @@
                       type="checkbox"
                       v-model="menuModel.isDeletable"
                       id="isDeletable"
+                      :disabled="isEdit && !menuModel.isDeletable"
                     />
                     <label class="form-check-label" for="isDeletable">
                       Silinebilir
                     </label>
+                    <div
+                      v-if="isEdit && !menuModel.isDeletable"
+                      class="form-text text-muted"
+                    >
+                      Bu menü silinemez
+                    </div>
                   </div>
                 </div>
               </div>
@@ -281,7 +269,7 @@
                       </div>
 
                       <!-- İçerik Editörü -->
-                      <div class="row">
+                      <div v-if="menuModel.type !== 2" class="row">
                         <div class="col-12">
                           <div class="fv-row mb-7">
                             <label class="fs-6 fw-bold mb-2">
@@ -362,7 +350,7 @@ const store = useStore();
 const addMenuModalRef = ref<null | HTMLElement>(null);
 const formRef = ref<null | HTMLElement>(null);
 const loading = ref<boolean>(false);
-const parentMenus = ref<MenuDto[]>([]);
+// parentMenus artık props'tan geliyor
 const activeTab = ref<number>(0);
 
 const emitted = defineEmits(["submitted", "update:modelValue"]);
@@ -371,6 +359,10 @@ const props = defineProps({
   modelValue: {
     type: Object as () => MenuDto,
     default: () => ({}),
+  },
+  parentMenus: {
+    type: Array as () => MenuDto[],
+    default: () => [],
   },
 });
 
@@ -430,8 +422,75 @@ const getTranslationByLanguage = (languageId: string) => {
 };
 
 const getMenuTitle = (menu: MenuDto) => {
-  const translation = menu.translations?.[0];
-  return translation?.title || "Başlıksız";
+  if (!menu.translations || menu.translations.length === 0) {
+    return "Başlıksız";
+  }
+
+  // Önce Türkçe translation'ı bul
+  const turkishTranslation = menu.translations.find(
+    (t) => t.language?.code === "tr"
+  );
+
+  if (turkishTranslation?.title) {
+    return turkishTranslation.title;
+  }
+
+  // Türkçe yoksa, title'ı olan ilk translation'ı bul
+  const translationWithTitle = menu.translations.find(
+    (t) => t.title && t.title.trim() !== ""
+  );
+
+  if (translationWithTitle?.title) {
+    return translationWithTitle.title;
+  }
+
+  // Hiçbirinde title yoksa ilk translation'ın title'ını al (boş olsa bile)
+  const firstTranslation = menu.translations[0];
+  return firstTranslation?.title || "Başlıksız";
+};
+
+// Menü seviyesini hesapla
+const getMenuLevel = (menu: MenuDto, allMenus: MenuDto[]): number => {
+  if (!menu.parentId) return 0;
+
+  const parent = allMenus.find((m) => m.id === menu.parentId);
+  if (!parent) return 0;
+
+  return 1 + getMenuLevel(parent, allMenus);
+};
+
+// Sıralı menü listesi oluştur
+const sortedParentMenus = computed(() => {
+  if (!props.parentMenus || props.parentMenus.length === 0) return [];
+
+  // Önce seviyeye göre grupla
+  const menusByLevel = props.parentMenus.reduce((acc, menu) => {
+    const level = getMenuLevel(menu, props.parentMenus);
+    if (!acc[level]) acc[level] = [];
+    acc[level].push(menu);
+    return acc;
+  }, {} as Record<number, MenuDto[]>);
+
+  // Her seviyeyi sortOrder'a göre sırala ve birleştir
+  const sortedMenus: MenuDto[] = [];
+  Object.keys(menusByLevel)
+    .sort((a, b) => parseInt(a) - parseInt(b))
+    .forEach((level) => {
+      const levelMenus = menusByLevel[parseInt(level)].sort(
+        (a, b) => a.sortOrder - b.sortOrder
+      );
+      sortedMenus.push(...levelMenus);
+    });
+
+  return sortedMenus;
+});
+
+// Seviye ile birlikte menü başlığı oluştur
+const getMenuTitleWithLevel = (menu: MenuDto): string => {
+  const level = getMenuLevel(menu, props.parentMenus);
+  const title = getMenuTitle(menu);
+  const indent = "  ".repeat(level);
+  return `${indent}${title}`;
 };
 
 // getFlagUrl fonksiyonu artık helper'dan geliyor
@@ -445,16 +504,7 @@ const setActiveTab = (index: number) => {
   }, 100);
 };
 
-const getParentMenus = async () => {
-  try {
-    const result = await MenuService.getAll();
-    if (result.result) {
-      parentMenus.value = result.entity || [];
-    }
-  } catch (error) {
-    console.error("Üst menüler yüklenirken hata:", error);
-  }
-};
+// getParentMenus artık gerekli değil çünkü veri props'tan geliyor
 
 watch(
   () => props.modelValue,
@@ -498,8 +548,51 @@ watch(
   { immediate: true }
 );
 
+// Type değiştiğinde çeviri kısmını kontrol et
+watch(
+  () => menuModel.value.type,
+  (newType) => {
+    if (menuModel.value.translations) {
+      if (newType === 2) {
+        // Type 2 (Kapça) ise sadece content'i boş yap
+        menuModel.value.translations.forEach((translation) => {
+          translation.content = "";
+        });
+      }
+    } else if (newType === 0 && !menuModel.value.translations) {
+      // Type 0 (Sayfa) ise ve translations yoksa oluştur
+      if (languages.value.length > 0) {
+        menuModel.value.translations = languages.value.map((lang) => ({
+          id: undefined,
+          isActive: true,
+          isDeleted: false,
+          menuId: menuModel.value.id || null,
+          languageId: lang.id || "",
+          title: "",
+          content: "",
+          slug: "",
+          seoTitle: "",
+          seoDescription: "",
+          seoKeywords: "",
+        }));
+      }
+    }
+  }
+);
+
 const onSubmit = async (values: any) => {
   const apiValues = { ...menuModel.value, ...values };
+
+  // Target'ı her zaman boş string olarak gönder
+  apiValues.target = "";
+
+  // Type 2 (Kapça) ise translations'lardaki content'leri boş yap
+  if (apiValues.type === 2 && apiValues.translations) {
+    apiValues.translations.forEach((translation) => {
+      translation.content = "";
+    });
+  }
+
   loading.value = true;
 
   try {
@@ -524,9 +617,7 @@ const onSubmit = async (values: any) => {
   }
 };
 
-onMounted(() => {
-  getParentMenus();
-});
+// onMounted artık gerekli değil çünkü veri props'tan geliyor
 </script>
 
 <style scoped>

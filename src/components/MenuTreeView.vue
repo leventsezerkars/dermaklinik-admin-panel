@@ -2,24 +2,25 @@
   <div class="menu-tree-view">
     <div class="card">
       <div class="card-header">
-        <h3 class="card-title">
-          <span class="svg-icon svg-icon-2 me-2">
-            <inline-svg src="media/icons/duotune/general/gen025.svg" />
-          </span>
-          Menü Ağaç Yapısı
-        </h3>
+        <div class="d-flex justify-content-between align-items-center">
+          <h3 class="card-title">
+            <span class="svg-icon svg-icon-2 me-2">
+              <inline-svg src="media/icons/duotune/general/gen025.svg" />
+            </span>
+            Menü Ağaç Yapısı
+          </h3>
+          <button
+            type="button"
+            class="btn btn-color-success btn-active-light-success"
+            @click="$emit('add')"
+          >
+            <i class="fas fa-plus"></i>
+            Yeni Menü Ekle
+          </button>
+        </div>
       </div>
       <div class="card-body">
-        <div v-if="loading" class="d-flex justify-content-center">
-          <div class="spinner-border text-primary" role="status">
-            <span class="visually-hidden">Yükleniyor...</span>
-          </div>
-        </div>
-
-        <div
-          v-else-if="treeData.length === 0"
-          class="text-center text-muted py-5"
-        >
+        <div v-if="treeData.length === 0" class="text-center text-muted py-5">
           <span class="svg-icon svg-icon-3x text-muted mb-3">
             <inline-svg src="media/icons/duotune/general/gen025.svg" />
           </span>
@@ -27,14 +28,15 @@
         </div>
 
         <div v-else class="menu-tree">
-          <div v-for="menu in treeData" :key="menu.id" class="menu-item">
-            <MenuTreeNode
-              :menu="menu"
-              :level="0"
-              @edit="$emit('edit', $event)"
-              @delete="$emit('delete', $event)"
-            />
-          </div>
+          <MenuTreeNode
+            v-for="menu in treeData"
+            :key="menu.id"
+            :menu="menu"
+            :level="0"
+            @edit="$emit('edit', $event)"
+            @delete="$emit('delete', $event)"
+            @addChild="$emit('addChild', $event)"
+          />
         </div>
       </div>
     </div>
@@ -42,53 +44,31 @@
 </template>
 
 <script setup lang="ts">
-import {
-  ref,
-  onMounted,
-  computed,
-  watch,
-  defineProps,
-  defineEmits,
-  withDefaults,
-} from "vue";
-import MenuService, { MenuDto } from "@/services/MenuService";
+import { computed, watch, defineProps, defineEmits, withDefaults } from "vue";
+import { MenuDto } from "@/services/MenuService";
 import MenuTreeNode from "./MenuTreeNode.vue";
 
 interface Props {
   refreshTrigger?: number;
+  menuData?: MenuDto[];
 }
 
 const props = withDefaults(defineProps<Props>(), {
   refreshTrigger: 0,
+  menuData: () => [],
 });
 
 const emit = defineEmits<{
   edit: [menu: MenuDto];
   delete: [menu: MenuDto];
+  add: [];
+  addChild: [menu: MenuDto];
 }>();
-
-const loading = ref(false);
-const menuData = ref<MenuDto[]>([]);
 
 // Ağaç yapısını oluştur
 const treeData = computed(() => {
-  return buildMenuTree(menuData.value);
+  return buildMenuTree(props.menuData);
 });
-
-// Menüleri yükle
-const loadMenus = async () => {
-  loading.value = true;
-  try {
-    const result = await MenuService.getAll();
-    if (result.result && result.data) {
-      menuData.value = result.data;
-    }
-  } catch (error) {
-    console.error("Menüler yüklenirken hata:", error);
-  } finally {
-    loading.value = false;
-  }
-};
 
 // Ağaç yapısını oluştur
 const buildMenuTree = (menus: MenuDto[]): MenuDto[] => {
@@ -129,17 +109,14 @@ const buildMenuTree = (menus: MenuDto[]): MenuDto[] => {
   return sortMenus(rootMenus);
 };
 
-// Props değiştiğinde yeniden yükle
+// Props değiştiğinde yeniden yükle (sadece refresh trigger için)
 watch(
   () => props.refreshTrigger,
   () => {
-    loadMenus();
+    // Parent component'ten refresh geldiğinde bu component otomatik güncellenecek
+    // çünkü props.menuData değişecek
   }
 );
-
-onMounted(() => {
-  loadMenus();
-});
 </script>
 
 <style scoped>
@@ -148,41 +125,43 @@ onMounted(() => {
 }
 
 .menu-tree-view .card {
-  border: none;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  border-radius: 16px;
+  border: 1px solid #e0e0e0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
   overflow: hidden;
 }
 
 .menu-tree-view .card-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border: none;
-  padding: 20px 24px;
+  background: #f8f9fa;
+  border-bottom: 1px solid #e0e0e0;
+  padding: 16px 20px;
 }
 
 .menu-tree-view .card-title {
-  color: white;
+  color: #333;
   font-weight: 600;
-  font-size: 18px;
+  font-size: 16px;
   margin: 0;
   display: flex;
   align-items: center;
 }
 
 .menu-tree-view .card-title .svg-icon {
-  color: white;
-  margin-right: 12px;
+  color: #666;
+  margin-right: 8px;
 }
 
 .menu-tree-view .card-body {
-  padding: 24px;
-  background: #fafbfc;
+  padding: 20px;
+  background: #ffffff;
 }
 
 .menu-tree {
-  max-height: 600px;
+  max-height: 500px;
   overflow-y: auto;
-  padding-right: 8px;
+  padding: 8px;
+  background: #fafafa;
+  border-radius: 4px;
 }
 
 .menu-tree::-webkit-scrollbar {
@@ -190,21 +169,17 @@ onMounted(() => {
 }
 
 .menu-tree::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: #f1f1f1;
   border-radius: 3px;
 }
 
 .menu-tree::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #cbd5e1 0%, #94a3b8 100%);
+  background: #c1c1c1;
   border-radius: 3px;
 }
 
 .menu-tree::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #94a3b8 0%, #64748b 100%);
-}
-
-.menu-item {
-  margin-bottom: 0;
+  background: #a8a8a8;
 }
 
 /* Loading spinner */
@@ -226,19 +201,20 @@ onMounted(() => {
 /* Responsive */
 @media (max-width: 768px) {
   .menu-tree-view .card-header {
-    padding: 16px 20px;
+    padding: 12px 16px;
   }
 
   .menu-tree-view .card-title {
-    font-size: 16px;
+    font-size: 14px;
   }
 
   .menu-tree-view .card-body {
-    padding: 20px;
+    padding: 16px;
   }
 
   .menu-tree {
-    max-height: 400px;
+    max-height: 300px;
+    padding: 4px;
   }
 }
 </style>

@@ -21,7 +21,7 @@ export type MenuTranslationDto = {
   seoTitle?: string;
   seoDescription?: string;
   seoKeywords?: string;
-  language?: LanguageDto[];
+  language?: LanguageDto;
 };
 
 export type CreateMenuTranslationDto = {
@@ -125,7 +125,7 @@ export const updateMenuSchema = yup.object({
 
 export default class MenuService {
   public static async getAll(): Promise<ApiResponse<MenuDto[]>> {
-    const result = await ApiService.get<MenuDto[]>("/api/Menu");
+    const result = await ApiService.get<MenuDto[]>("/api/Menu?take=10000");
     return result.data;
   }
 
