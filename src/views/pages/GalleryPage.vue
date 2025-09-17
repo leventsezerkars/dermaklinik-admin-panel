@@ -161,9 +161,9 @@
                         </div>
                       </div>
                       <div class="card-body">
-                        <!-- Filtreler -->
+                        <!-- Filtreler ve Görünüm -->
                         <div class="row mb-4">
-                          <div class="col-md-6">
+                          <div class="col-md-3">
                             <input
                               v-model="imageSearch"
                               type="text"
@@ -171,7 +171,7 @@
                               placeholder="Resim ara..."
                             />
                           </div>
-                          <div class="col-md-3">
+                          <div class="col-md-2">
                             <select
                               v-model="selectedGroupFilter"
                               class="form-select"
@@ -188,12 +188,51 @@
                               </option>
                             </select>
                           </div>
-                          <div class="col-md-3">
+                          <div class="col-md-2">
+                            <select v-model="statusFilter" class="form-select">
+                              <option value="">Tüm Durumlar</option>
+                              <option value="active">Aktif</option>
+                              <option value="inactive">Pasif</option>
+                            </select>
+                          </div>
+                          <div class="col-md-2">
                             <select v-model="sortOrder" class="form-select">
                               <option value="newest">En Yeni</option>
                               <option value="oldest">En Eski</option>
                               <option value="name">İsme Göre</option>
                             </select>
+                          </div>
+                          <div class="col-md-3">
+                            <div class="d-flex justify-content-end">
+                              <div class="btn-group btn-group-sm" role="group">
+                                <button
+                                  type="button"
+                                  class="btn btn-sm"
+                                  :class="
+                                    viewMode === 'grid'
+                                      ? 'btn-primary'
+                                      : 'btn-outline-secondary'
+                                  "
+                                  @click="viewMode = 'grid'"
+                                  title="Grid Görünümü"
+                                >
+                                  <i class="fas fa-th"></i>
+                                </button>
+                                <button
+                                  type="button"
+                                  class="btn btn-sm"
+                                  :class="
+                                    viewMode === 'list'
+                                      ? 'btn-primary'
+                                      : 'btn-outline-secondary'
+                                  "
+                                  @click="viewMode = 'list'"
+                                  title="Liste Görünümü"
+                                >
+                                  <i class="fas fa-list"></i>
+                                </button>
+                              </div>
+                            </div>
                           </div>
                         </div>
 
@@ -222,140 +261,26 @@
                           </p>
                         </div>
                         <!-- Resim Grid -->
-                        <div v-else class="row">
-                          <div
-                            v-for="image in filteredImages"
-                            :key="image.id"
-                            class="col-md-4 col-lg-3 mb-4"
-                          >
-                            <div class="image-item card h-100">
-                              <div class="image-container position-relative">
-                                <img
-                                  :src="
-                                    image.imageUrl ||
-                                    'media/icons/duotune/files/fil008.svg'
-                                  "
-                                  :alt="image.altText || image.title"
-                                  class="card-img-top cursor-pointer"
-                                  style="height: 200px; object-fit: cover"
-                                  @error="handleImageError"
-                                  @click="zoomImage(image)"
-                                  title="Resmi büyütmek için tıklayın"
-                                />
-                                <div
-                                  class="image-overlay position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center opacity-0 hover-opacity-100 transition-opacity"
-                                >
-                                  <div class="btn-group">
-                                    <button
-                                      type="button"
-                                      class="btn btn-light btn-sm"
-                                      @click="zoomImage(image)"
-                                      title="Büyüt"
-                                    >
-                                      <span class="svg-icon svg-icon-3">
-                                        <inline-svg
-                                          src="media/icons/duotune/general/gen021.svg"
-                                        />
-                                      </span>
-                                    </button>
-                                    <button
-                                      type="button"
-                                      class="btn btn-light btn-sm"
-                                      @click="editImage(image)"
-                                      title="Düzenle"
-                                    >
-                                      <span class="svg-icon svg-icon-3">
-                                        <inline-svg
-                                          src="media/icons/duotune/art/art005.svg"
-                                        />
-                                      </span>
-                                    </button>
-                                    <button
-                                      type="button"
-                                      class="btn btn-light btn-sm"
-                                      @click="deleteImage(image)"
-                                      title="Sil"
-                                    >
-                                      <span class="svg-icon svg-icon-3">
-                                        <inline-svg
-                                          src="media/icons/duotune/general/gen027.svg"
-                                        />
-                                      </span>
-                                    </button>
-                                  </div>
-                                </div>
-                              </div>
-                              <div class="card-body d-flex flex-column">
-                                <!-- Başlık -->
-                                <h6
-                                  class="card-title mb-2 fw-bold text-truncate"
-                                  :title="image.title"
-                                >
-                                  {{ image.title || "İsimsiz" }}
-                                </h6>
+                        <GalleryGridView
+                          v-else-if="viewMode === 'grid'"
+                          :images="filteredImages"
+                          @zoom-image="zoomImage"
+                          @edit-image="editImage"
+                          @deactivate-image="deactivateImage"
+                          @activate-image="activateImage"
+                          @hard-delete-image="hardDeleteImage"
+                        />
 
-                                <!-- Açıklama -->
-                                <p
-                                  v-if="image.caption"
-                                  class="card-text small text-muted mb-2 text-truncate-2"
-                                >
-                                  {{ image.caption }}
-                                </p>
-
-                                <!-- Grup bilgileri -->
-                                <div class="mb-2 flex-grow-1">
-                                  <div
-                                    v-if="
-                                      image.groups && image.groups.length > 0
-                                    "
-                                  >
-                                    <small
-                                      class="text-muted d-block mb-1 fw-semibold"
-                                      >Gruplar:</small
-                                    >
-                                    <div class="d-flex flex-wrap gap-1">
-                                      <span
-                                        v-for="group in image.groups"
-                                        :key="group.id"
-                                        class="badge badge-light-info badge-sm"
-                                      >
-                                        {{ group.name || "İsimsiz Grup" }}
-                                      </span>
-                                    </div>
-                                  </div>
-                                  <div v-else>
-                                    <span
-                                      class="badge badge-light-secondary badge-sm"
-                                    >
-                                      Grupsuz
-                                    </span>
-                                  </div>
-                                </div>
-
-                                <!-- Alt bilgiler -->
-                                <div class="mt-auto">
-                                  <div
-                                    class="d-flex justify-content-between align-items-center"
-                                  >
-                                    <span
-                                      :class="{
-                                        'badge badge-light-success':
-                                          image.isActive,
-                                        'badge badge-light-danger':
-                                          !image.isActive,
-                                      }"
-                                    >
-                                      {{ image.isActive ? "Aktif" : "Pasif" }}
-                                    </span>
-                                    <small class="text-muted">
-                                      {{ formatDate(image.createdAt) }}
-                                    </small>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
+                        <!-- Liste Görünümü -->
+                        <GalleryListView
+                          v-else-if="viewMode === 'list'"
+                          :images="filteredImages"
+                          @zoom-image="zoomImage"
+                          @edit-image="editImage"
+                          @deactivate-image="deactivateImage"
+                          @activate-image="activateImage"
+                          @hard-delete-image="hardDeleteImage"
+                        />
                       </div>
                     </div>
                   </div>
@@ -689,7 +614,10 @@
 // Component name: GalleryPage
 import { ref, reactive, onMounted, computed, watch } from "vue";
 import Modal from "@/components/Modal/Modal.vue";
+import GalleryGridView from "@/components/gallery/GalleryGridView.vue";
+import GalleryListView from "@/components/gallery/GalleryListView.vue";
 import { validateAndConvertLogo } from "@/core/helpers/fileHelper";
+import SwalAlert from "@/core/helpers/swalalert";
 import GalleryImageService, {
   GalleryImageDto,
   CreateGalleryImageDto,
@@ -706,6 +634,7 @@ import GalleryImageGroupMapService from "@/services/GalleryImageGroupMapService"
 interface ModalInstance {
   show: () => void;
   hide: () => void;
+  _isShown: boolean;
 }
 
 // Reactive state
@@ -715,8 +644,10 @@ const groupImages = ref<GalleryImageDto[]>([]); // Seçili grubun resimleri
 const selectedGroup = ref<GalleryGroupDto | null>(null);
 const loading = ref(false);
 const imageSearch = ref("");
-const selectedGroupFilter = ref<string | null>(null);
+const selectedGroupFilter = ref<string>("");
 const sortOrder = ref("newest");
+const statusFilter = ref<string>(""); // "active", "inactive", "" (all)
+const viewMode = ref<"grid" | "list">("grid"); // "grid" veya "list"
 
 // Modal refs
 const createGroupModalRef = ref<ModalInstance | null>(null);
@@ -780,6 +711,15 @@ const filteredImages = computed(() => {
     filtered = filtered.filter((img) => !img.groups || img.groups.length === 0);
   }
 
+  // Durum filtresi (aktif/pasif)
+  if (statusFilter.value) {
+    if (statusFilter.value === "active") {
+      filtered = filtered.filter((img) => img.isActive);
+    } else if (statusFilter.value === "inactive") {
+      filtered = filtered.filter((img) => !img.isActive);
+    }
+  }
+
   // Sıralama
   filtered.sort((a, b) => {
     switch (sortOrder.value) {
@@ -835,11 +775,6 @@ const loadGroups = async () => {
 
 const loadImages = async (groupId?: string) => {
   try {
-    console.log(
-      "Resimler yükleniyor...",
-      groupId ? `Grup ID: ${groupId}` : "Tüm resimler"
-    );
-
     let response;
     if (groupId) {
       // Belirli gruba ait resimleri getir
@@ -866,6 +801,15 @@ const loadImages = async (groupId?: string) => {
       console.warn("Unexpected response format:", response);
       imageArray = [];
     }
+    imageArray.forEach((image) => {
+      if (image.groups && Array.isArray(image.groups)) {
+        image.groupIds = image.groups
+          .map((g) => g.id)
+          .filter((id) => id) as string[];
+      } else {
+        image.groupIds = [];
+      }
+    });
 
     // Resimleri doğru ref'e ata
     if (groupId) {
@@ -873,8 +817,6 @@ const loadImages = async (groupId?: string) => {
     } else {
       allImages.value = imageArray;
     }
-
-    console.log("State'e atanan resimler:", imageArray);
   } catch (error) {
     console.error("Resimler yüklenirken hata:", error);
     alert("Resimler yüklenirken hata oluştu: " + error);
@@ -890,7 +832,7 @@ const loadImages = async (groupId?: string) => {
 const selectGroup = async (group: GalleryGroupDto) => {
   selectedGroup.value = group;
   // Seçilen gruba göre filtreyi güncelle
-  selectedGroupFilter.value = group.id || null;
+  selectedGroupFilter.value = group.id || "";
   // Seçilen gruba ait resimleri yükle
   if (group.id) {
     await loadImages(group.id);
@@ -1009,8 +951,6 @@ const openUploadModal = () => {
 
 const editImage = (image: GalleryImageDto) => {
   // Resim düzenleme modal'ı açılacak
-  console.log("Resim düzenle:", image);
-
   // Düzenlenen resmi set et
   editingImage.value = image;
 
@@ -1019,49 +959,81 @@ const editImage = (image: GalleryImageDto) => {
   imageForm.AltText = image.altText || "";
   imageForm.Caption = image.caption || "";
   imageForm.IsActive = image.isActive;
-
-  // Grup ID'lerini doğru şekilde al
-  if (image.groups && Array.isArray(image.groups)) {
-    imageForm.GroupIds = image.groups
-      .map((g) => g.id)
-      .filter((id) => id) as string[];
-  } else {
-    imageForm.GroupIds = [];
-  }
-
-  console.log("Form verileri:", {
-    Title: imageForm.Title,
-    AltText: imageForm.AltText,
-    Caption: imageForm.Caption,
-    IsActive: imageForm.IsActive,
-    GroupIds: imageForm.GroupIds,
-  });
-
-  console.log("Orijinal resim verisi:", {
-    id: image.id,
-    title: image.title,
-    groups: image.groups,
-    groupIds: image.groupIds,
-  });
-
+  imageForm.GroupIds = image.groupIds || [];
   // Modal'ı aç
   if (uploadModalRef.value) {
     uploadModalRef.value.show();
   }
 };
 
-const deleteImage = async (image: GalleryImageDto) => {
-  if (
-    !confirm(`${image.title || "Bu resmi"} silmek istediğinizden emin misiniz?`)
-  ) {
-    return;
-  }
+// Hard delete - resmi tamamen sil
+const hardDeleteImage = async (image: GalleryImageDto) => {
+  const result = await SwalAlert.confirm({
+    title: "Resmi Kalıcı Olarak Sil",
+    text: `${
+      image.title || "Bu resim"
+    } kalıcı olarak silinecek. Bu işlem geri alınamaz!`,
+    confirmButtonText: "Evet, Sil",
+    cancelButtonText: "İptal",
+    type: "warning",
+  });
 
+  if (result.isConfirmed) {
+    try {
+      await GalleryImageService.hardDeleteImage(image.id!);
+      await loadImages();
+      SwalAlert.toast("Resim kalıcı olarak silindi", "success");
+    } catch (error) {
+      console.error("Resim kalıcı olarak silinirken hata:", error);
+      SwalAlert.toast("Resim silinirken hata oluştu", "error");
+    }
+  }
+};
+
+// Soft delete - resmi pasife çek
+const deactivateImage = async (image: GalleryImageDto) => {
+  const result = await SwalAlert.confirm({
+    title: "Resmi Pasife Çek",
+    text: `${image.title || "Bu resim"} pasife çekilecek.`,
+    confirmButtonText: "Evet, Pasife Çek",
+    cancelButtonText: "İptal",
+    type: "question",
+  });
+
+  if (result.isConfirmed) {
+    try {
+      await GalleryImageService.deleteImage(image.id!);
+      await loadImages();
+      SwalAlert.toast("Resim pasife çekildi", "success");
+    } catch (error) {
+      console.error("Resim pasife çekilirken hata:", error);
+      SwalAlert.toast("Resim pasife çekilirken hata oluştu", "error");
+    }
+  }
+};
+
+// Resmi aktife çek
+const activateImage = async (image: GalleryImageDto) => {
   try {
-    await GalleryImageService.deleteImage(image.id!);
-    await loadImages();
+    // Resmi edit moduna al
+    editingImage.value = image;
+    // Form verilerini güncelle
+    imageForm.Title = image.title || "";
+    imageForm.AltText = image.altText || "";
+    imageForm.Caption = image.caption || "";
+    imageForm.IsActive = true; // Aktife çek
+    imageForm.GroupIds = image.groupIds || [];
+
+    // Dosya seçimini temizle (yeni resim yüklemeyeceğiz)
+    selectedFiles.value = [];
+
+    // uploadImage fonksiyonunu çağır (edit modunda çalışacak)
+    await uploadImage();
+
+    SwalAlert.toast("Resim aktife çekildi", "success");
   } catch (error) {
-    console.error("Resim silinirken hata:", error);
+    console.error("Resim aktife çekilirken hata:", error);
+    SwalAlert.toast("Resim aktife çekilirken hata oluştu", "error");
   }
 };
 
@@ -1158,7 +1130,11 @@ const uploadImage = async () => {
     // Form'u temizle ve resimleri yeniden yükle
     await loadImages();
     resetImageForm();
-    uploadModalRef.value?.hide();
+
+    // Modal açıksa kapat (Bootstrap modal'ın _isShown özelliğini kontrol et)
+    if (uploadModalRef.value && uploadModalRef.value._isShown) {
+      uploadModalRef.value.hide();
+    }
 
     console.log("İşlem tamamlandı");
   } catch (error) {

@@ -68,7 +68,7 @@ export const createGalleryImageSchema = yup.object({
   AltText: yup.string().nullable(),
   Caption: yup.string().nullable(),
   IsActive: yup.boolean().required(),
-  GroupIds: yup.array().of(yup.string().uuid()).nullable(),
+  GroupIds: yup.array().of(yup.string().required()).nullable().default([]),
 });
 
 export const updateGalleryImageSchema = yup.object({
@@ -78,7 +78,7 @@ export const updateGalleryImageSchema = yup.object({
   AltText: yup.string().nullable(),
   Caption: yup.string().nullable(),
   IsActive: yup.boolean().required(),
-  GroupIds: yup.array().of(yup.string().uuid()).nullable(),
+  GroupIds: yup.array().of(yup.string().required()).nullable().default([]),
 });
 
 export const addToGroupSchema = yup.object({
@@ -172,10 +172,21 @@ class GalleryImageService {
       if (data.Caption) formData.append("Caption", data.Caption);
       formData.append("IsActive", data.IsActive.toString());
 
+      console.log("GroupIds değeri:", data.GroupIds);
       if (data.GroupIds && data.GroupIds.length > 0) {
-        data.GroupIds.forEach((groupId) => {
-          formData.append("GroupIds", groupId);
+        console.log("GroupIds FormData'ya ekleniyor:", data.GroupIds);
+        // GroupIds'i indexlenmiş form parametreleri olarak gönder
+        data.GroupIds.forEach((groupId, index) => {
+          formData.append(`GroupIds[${index}]`, groupId);
         });
+      } else {
+        console.log("GroupIds boş veya tanımsız");
+      }
+
+      // FormData içeriğini kontrol et
+      console.log("FormData içeriği:");
+      for (const [key, value] of formData.entries()) {
+        console.log(key, value);
       }
 
       const response = await ApiService.post<GalleryImageDto>(
@@ -203,49 +214,12 @@ class GalleryImageService {
     data: UpdateGalleryImageDto
   ): Promise<GalleryImageDto> {
     try {
-      console.log("updateImage - Gelen data objesi:", data);
-      console.log("updateImage - data.id:", data.id);
-      console.log("updateImage - data.id type:", typeof data.id);
-
       // data'dan id'yi çıkar ve parametre olarak gelen id'yi kullan
       const { id: dataId, ...dataWithoutId } = data;
-      const updateData = { ...dataWithoutId, id: id };
-
-      console.log("updateImage - Validation öncesi veri:", updateData);
-      console.log("updateImage - ID:", id);
-      console.log("updateImage - GroupIds:", data.GroupIds);
-      console.log("updateImage - dataWithoutId:", dataWithoutId);
-      console.log("updateImage - updateData.id:", updateData.id);
-      console.log("updateImage - updateData.id type:", typeof updateData.id);
-      console.log(
-        "updateImage - updateData.id === undefined:",
-        updateData.id === undefined
-      );
-      console.log(
-        "updateImage - updateData.id === null:",
-        updateData.id === null
-      );
-      console.log("updateImage - updateData keys:", Object.keys(updateData));
-
+      //const updateData = { ...dataWithoutId, id: id };
       // UUID formatını test et
-      const uuidRegex =
-        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-      console.log("ID UUID formatında mı:", uuidRegex.test(id));
-      if (data.GroupIds) {
-        data.GroupIds.forEach((groupId, index) => {
-          console.log(
-            `GroupId[${index}] UUID formatında mı:`,
-            uuidRegex.test(groupId)
-          );
-        });
-      }
-
       // Yup validation'ı geçici olarak bypass ediyoruz
-      // await updateGalleryImageSchema.validate(updateData);
-      console.log(
-        "Yup validation bypass edildi - doğrudan API'ye gönderiliyor"
-      );
-
+      //await updateGalleryImageSchema.validate(updateData);
       // FormData oluştur
       const formData = new FormData();
 
@@ -271,8 +245,9 @@ class GalleryImageService {
       formData.append("IsActive", data.IsActive.toString());
 
       if (data.GroupIds && data.GroupIds.length > 0) {
-        data.GroupIds.forEach((groupId) => {
-          formData.append("GroupIds", groupId);
+        // GroupIds'i indexlenmiş form parametreleri olarak gönder
+        data.GroupIds.forEach((groupId, index) => {
+          formData.append(`GroupIds[${index}]`, groupId);
         });
       }
 
