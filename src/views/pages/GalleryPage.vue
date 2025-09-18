@@ -562,14 +562,40 @@
                   selectedImageForZoom.groups.length > 0
                 "
               >
-                <div class="d-flex flex-wrap gap-1">
-                  <span
+                <div class="d-flex flex-column gap-2">
+                  <div
                     v-for="group in selectedImageForZoom.groups"
                     :key="group.id"
-                    class="badge badge-light-info"
+                    class="d-flex align-items-center justify-content-between p-2 border rounded bg-light"
                   >
-                    {{ group.name || "İsimsiz Grup" }}
-                  </span>
+                    <div class="d-flex align-items-center gap-2">
+                      <span class="badge badge-light-info">
+                        {{ group.name || "İsimsiz Grup" }}
+                      </span>
+                      <small class="text-muted">
+                        Sıra: {{ selectedImageForZoom.sortOrder || 0 }}
+                      </small>
+                    </div>
+                    <div class="d-flex gap-1">
+                      <button
+                        type="button"
+                        class="btn btn-outline-primary btn-sm"
+                        @click="moveImageUp(selectedImageForZoom, group)"
+                        title="Yukarı Taşı"
+                        :disabled="(selectedImageForZoom.sortOrder || 0) <= 1"
+                      >
+                        <i class="fas fa-arrow-up"></i>
+                      </button>
+                      <button
+                        type="button"
+                        class="btn btn-outline-primary btn-sm"
+                        @click="moveImageDown(selectedImageForZoom, group)"
+                        title="Aşağı Taşı"
+                      >
+                        <i class="fas fa-arrow-down"></i>
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
               <div v-else>
@@ -623,6 +649,7 @@ import GalleryImageService, {
   CreateGalleryImageDto,
   UpdateGalleryImageDto,
   AddToGroupCommand,
+  UpdateImageOrderCommand,
 } from "@/services/GalleryImageService";
 import GalleryGroupService, {
   GalleryGroupDto,
@@ -742,6 +769,21 @@ const filteredImages = computed(() => {
 
   return filtered;
 });
+
+// Helper function to refresh images based on current filter
+const refreshImages = async () => {
+  // Her zaman tüm resimleri yenile
+  await loadImages();
+
+  // Eğer belirli bir grup seçiliyse, o grubun resimlerini de yenile
+  if (
+    selectedGroupFilter.value &&
+    selectedGroupFilter.value !== "" &&
+    selectedGroupFilter.value !== "ungrouped"
+  ) {
+    await loadImages(selectedGroupFilter.value);
+  }
+};
 
 // Methods
 const loadGroups = async () => {
@@ -1127,14 +1169,16 @@ const uploadImage = async () => {
       }
     }
 
-    // Form'u temizle ve resimleri yeniden yükle
-    await loadImages();
-    resetImageForm();
+    // Resimleri yeniden yükle
+    await refreshImages();
 
-    // Modal açıksa kapat (Bootstrap modal'ın _isShown özelliğini kontrol et)
-    if (uploadModalRef.value && uploadModalRef.value._isShown) {
+    // Modal'ı kapat
+    if (uploadModalRef.value) {
       uploadModalRef.value.hide();
     }
+
+    // Form'u temizle (modal kapandıktan sonra)
+    resetImageForm();
 
     console.log("İşlem tamamlandı");
   } catch (error) {
@@ -1171,6 +1215,81 @@ const editImageFromZoom = (image: GalleryImageDto) => {
   setTimeout(() => {
     editImage(image);
   }, 300); // Modal kapanma animasyonu için gecikme
+};
+
+// Resim sıralama fonksiyonları
+const moveImageUp = async (image: GalleryImageDto, group: any) => {
+  try {
+    const currentOrder = image.sortOrder || 0;
+    if (currentOrder <= 1) return;
+
+    console.log("moveImageUp çağrıldı:", {
+      imageId: image.id,
+      groupId: group.id,
+      groupIdType: typeof group.id,
+      currentOrder,
+      newOrder: currentOrder - 1,
+    });
+
+    const updateData: UpdateImageOrderCommand = {
+      imageId: image.id!,
+      groupId: group.id,
+      newSortOrder: currentOrder - 1,
+    };
+
+    await GalleryImageService.updateImageOrder(updateData);
+    await refreshImages();
+
+    // Modal'daki resmi güncelle
+    if (selectedImageForZoom.value?.id === image.id) {
+      const updatedImage = allImages.value.find((img) => img.id === image.id);
+      if (updatedImage) {
+        selectedImageForZoom.value = updatedImage;
+      }
+    }
+
+    SwalAlert.toast("Resim sırası güncellendi", "success");
+  } catch (error) {
+    console.error("Resim sırası güncellenirken hata:", error);
+    SwalAlert.toast("Resim sırası güncellenirken hata oluştu", "error");
+  }
+};
+
+const moveImageDown = async (image: GalleryImageDto, group: any) => {
+  try {
+    const currentOrder = image.sortOrder || 0;
+    const newOrder = currentOrder + 1;
+
+    console.log("moveImageDown çağrıldı:", {
+      imageId: image.id,
+      groupId: group.id,
+      groupIdType: typeof group.id,
+      currentOrder,
+      newOrder,
+    });
+
+    const updateData: UpdateImageOrderCommand = {
+      imageId: image.id!,
+      groupId: group.id,
+      newSortOrder: newOrder,
+    };
+
+    await GalleryImageService.updateImageOrder(updateData);
+    await refreshImages();
+
+    // Modal'daki resmi güncelle
+    if (selectedImageForZoom.value?.id === image.id) {
+      const updatedImage = allImages.value.find((img) => img.id === image.id);
+      if (updatedImage) {
+        selectedImageForZoom.value = updatedImage;
+      }
+    }
+
+    SwalAlert.toast("Resim sırası güncellendi", "success");
+  } catch (error) {
+    console.error("Resim sırası güncellenirken hata:", error);
+    SwalAlert.toast("Resim sırası güncellenirken hata oluştu", "error");
+  }
 };
 
 // Watchers

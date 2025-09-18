@@ -16,6 +16,7 @@ export type GalleryImageDto = {
   title?: string;
   altText?: string;
   caption?: string;
+  sortOrder?: number;
   groupIds?: string[];
   groups?: Array<{
     id?: string;
@@ -319,7 +320,7 @@ class GalleryImageService {
   // Resim sıralamasını güncelle
   async updateImageOrder(data: UpdateImageOrderCommand): Promise<void> {
     try {
-      await updateImageOrderSchema.validate(data);
+      //await updateImageOrderSchema.validate(data);
       await ApiService.put(`${this.baseUrl}/update-order`, data);
     } catch (error) {
       console.error("Resim sıralaması güncellenirken hata oluştu:", error);

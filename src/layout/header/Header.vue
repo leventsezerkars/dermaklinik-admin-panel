@@ -28,7 +28,11 @@
       <!--begin::Mobile logo-->
       <div class="d-flex align-items-center flex-grow-1 flex-lg-grow-0">
         <a href="#">
-          <img alt="Logo" src="media/logos/logo.png" class="h-30px" />
+          <img
+            :alt="companyName"
+            :src="logoUrl || 'media/logos/logo.png'"
+            class="h-30px"
+          />
         </a>
       </div>
       <!--end::Mobile logo-->
@@ -57,7 +61,8 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, computed } from "vue";
+import { useStore } from "vuex";
 import KTTopbar from "@/layout/header/Topbar.vue";
 import KTMenu from "@/layout/header/Menu.vue";
 
@@ -77,10 +82,19 @@ export default defineComponent({
     KTMenu,
   },
   setup() {
+    const store = useStore();
+
+    const logoUrl = computed(() => store.getters["CompanyInfoModule/logoUrl"]);
+    const companyName = computed(
+      () => store.getters["CompanyInfoModule/companyName"]
+    );
+
     return {
       headerWidthFluid,
       headerLeft,
       asideDisplay,
+      logoUrl,
+      companyName,
     };
   },
 });

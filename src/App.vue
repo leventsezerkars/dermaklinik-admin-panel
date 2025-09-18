@@ -13,12 +13,22 @@ export default defineComponent({
   setup() {
     const store = useStore();
 
-    onMounted(() => {
+    onMounted(async () => {
       /**
        * this is to override the layout config using saved data from localStorage
        * remove this to use config only from static config (@/core/config/DefaultLayoutConfig.ts)
        */
       store.commit(Mutations.OVERRIDE_LAYOUT_CONFIG);
+
+      // Cache'i temizle ve CompanyInfo'yu yükle (logo ve favicon için)
+      try {
+        // Cache'i temizle
+        store.commit("CompanyInfoModule/SET_LAST_FETCH", 0);
+        await store.dispatch("CompanyInfoModule/fetchCompanyInfo");
+      } catch (error) {
+        console.warn("CompanyInfo yüklenirken hata:", error);
+      }
+
       nextTick(() => {
         initializeComponents();
       });

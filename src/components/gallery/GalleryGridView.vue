@@ -34,10 +34,10 @@
           <div
             class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-dark bg-opacity-50 opacity-0 hover-opacity-100 transition-all"
           >
-            <div class="btn-group-vertical btn-group-sm">
+            <div class="btn-group btn-group-sm">
               <button
                 type="button"
-                class="btn btn-light mb-1"
+                class="btn btn-light btn-sm"
                 @click="$emit('zoom-image', image)"
                 title="Büyüt"
               >
@@ -45,7 +45,7 @@
               </button>
               <button
                 type="button"
-                class="btn btn-primary mb-1"
+                class="btn btn-primary btn-sm"
                 @click="$emit('edit-image', image)"
                 title="Düzenle"
               >
@@ -55,7 +55,7 @@
               <button
                 v-if="image.isActive"
                 type="button"
-                class="btn btn-warning mb-1"
+                class="btn btn-warning btn-sm"
                 @click="$emit('deactivate-image', image)"
                 title="Pasife Çek"
               >
@@ -64,7 +64,7 @@
               <button
                 v-else
                 type="button"
-                class="btn btn-success mb-1"
+                class="btn btn-success btn-sm"
                 @click="$emit('activate-image', image)"
                 title="Aktife Çek"
               >
@@ -73,7 +73,7 @@
               <!-- Hard delete butonu -->
               <button
                 type="button"
-                class="btn btn-danger"
+                class="btn btn-danger btn-sm"
                 @click="$emit('hard-delete-image', image)"
                 title="Kalıcı Olarak Sil"
               >
