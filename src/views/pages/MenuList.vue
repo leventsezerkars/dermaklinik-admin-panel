@@ -53,7 +53,6 @@ const refreshTrigger = ref<number>(0);
 
 // Methods
 const loadAllMenus = async () => {
-  console.log("loadAllMenus");
   try {
     const result = await MenuService.getAll();
     if (result.result) {

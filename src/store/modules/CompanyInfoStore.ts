@@ -29,21 +29,15 @@ const CompanyInfoModule: Module<CompanyInfoState, any> = {
 
   mutations: {
     SET_COMPANY_INFO(state, companyInfo: CompanyInfoDto | null) {
-      console.log("SET_COMPANY_INFO mutation çağrıldı:", companyInfo);
       state.companyInfo = companyInfo;
       if (companyInfo) {
         localStorage.setItem("companyInfo", JSON.stringify(companyInfo));
-        console.log(
-          "CompanyInfo localStorage'a kaydedildi, logoUrl:",
-          companyInfo.logoUrl
-        );
         // Favicon'u ayarla (async)
         setCompanyFavicon(companyInfo.logoUrl || null).catch((error) => {
           console.error("Favicon ayarlanırken hata:", error);
         });
       } else {
         localStorage.removeItem("companyInfo");
-        console.log("CompanyInfo localStorage'dan kaldırıldı");
         // Favicon'u sıfırla (async)
         setCompanyFavicon(null).catch((error) => {
           console.error("Favicon sıfırlanırken hata:", error);
@@ -61,7 +55,6 @@ const CompanyInfoModule: Module<CompanyInfoState, any> = {
 
   actions: {
     async fetchCompanyInfo({ commit, state }) {
-      console.log("fetchCompanyInfo action çağrıldı");
       // Cache kontrolü - 1 saat
       const now = Date.now();
       const oneHour = 60 * 60 * 1000;
@@ -71,26 +64,18 @@ const CompanyInfoModule: Module<CompanyInfoState, any> = {
         state.lastFetch &&
         now - state.lastFetch < oneHour
       ) {
-        console.log(
-          "Cache geçerli, mevcut CompanyInfo döndürülüyor:",
-          state.companyInfo
-        );
         return state.companyInfo; // Cache geçerli
       }
 
       try {
-        console.log("API'den CompanyInfo yükleniyor...");
         commit("SET_LOADING", true);
         const response = await CompanyInfoService.getActiveSingle();
-        console.log("API response:", response);
 
         if (response.result && response.data) {
-          console.log("CompanyInfo başarıyla yüklendi:", response.data);
           commit("SET_COMPANY_INFO", response.data);
           commit("SET_LAST_FETCH", now);
           return response.data;
         } else {
-          console.log("CompanyInfo bulunamadı");
           commit("SET_COMPANY_INFO", null);
           return null;
         }

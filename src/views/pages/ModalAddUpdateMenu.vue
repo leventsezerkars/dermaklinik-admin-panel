@@ -192,6 +192,12 @@
                               v-model="
                                 getTranslationByLanguage(language.id).title
                               "
+                              @input="
+                                onTitleChange(
+                                  language.id,
+                                  ($event.target as HTMLInputElement).value
+                                )
+                              "
                               type="text"
                               class="form-control"
                               :placeholder="`${language.name} menü adı`"
@@ -210,6 +216,7 @@
                               type="text"
                               class="form-control"
                               :placeholder="`${language.name} slug`"
+                              disabled
                             />
                           </div>
                         </div>
@@ -259,6 +266,12 @@
                               v-model="
                                 getTranslationByLanguage(language.id)
                                   .seoKeywords
+                              "
+                              @input="
+                                onKeywordsChange(
+                                  language.id,
+                                  ($event.target as HTMLInputElement).value
+                                )
                               "
                               type="text"
                               class="form-control"
@@ -344,6 +357,7 @@ import MenuService, {
 } from "@/services/MenuService";
 import { LanguageDto } from "@/services/LanguageService";
 import { getFlagUrl } from "@/core/helpers/languageHelper";
+import { generateMenuData } from "@/core/helpers/slugHelper";
 import TinyEditor from "@/components/TinyEditor.vue";
 
 const store = useStore();
@@ -352,6 +366,11 @@ const formRef = ref<null | HTMLElement>(null);
 const loading = ref<boolean>(false);
 // parentMenus artık props'tan geliyor
 const activeTab = ref<number>(0);
+
+// Manuel değişiklikleri takip etmek için state (sadece keywords için)
+const manualChanges = ref<{
+  [languageId: string]: { keywords: boolean };
+}>({});
 
 const emitted = defineEmits(["submitted", "update:modelValue"]);
 
@@ -419,6 +438,45 @@ const getTranslationByLanguage = (languageId: string) => {
     menuModel.value.translations.push(translation);
   }
   return translation;
+};
+
+// Manuel değişiklik state'ini başlat
+const initializeManualChanges = (languageId: string) => {
+  if (!manualChanges.value[languageId]) {
+    manualChanges.value[languageId] = { keywords: false };
+  }
+};
+
+// Menü adı değiştiğinde otomatik slug ve anahtar kelime oluştur
+const onTitleChange = (languageId: string, title: string) => {
+  const translation = getTranslationByLanguage(languageId);
+  translation.title = title;
+
+  // Manuel değişiklik state'ini başlat
+  initializeManualChanges(languageId);
+
+  // Title değiştiğinde slug ve keywords'i güncelle
+  if (title && title.trim()) {
+    const { slug, keywords } = generateMenuData(title);
+
+    // Slug'ı her zaman güncelle (manuel düzenleme yok)
+    translation.slug = slug;
+
+    // Keywords'i güncelle (manuel değişiklik yapılmadıysa)
+    if (!manualChanges.value[languageId].keywords) {
+      translation.seoKeywords = keywords;
+    }
+  }
+};
+
+// Anahtar kelimeler değiştiğinde manuel olarak güncellenebilir
+const onKeywordsChange = (languageId: string, keywords: string) => {
+  const translation = getTranslationByLanguage(languageId);
+  translation.seoKeywords = keywords;
+
+  // Manuel değişiklik yapıldığını işaretle
+  initializeManualChanges(languageId);
+  manualChanges.value[languageId].keywords = true;
 };
 
 const getMenuTitle = (menu: MenuDto) => {
@@ -617,7 +675,15 @@ const onSubmit = async (values: any) => {
   }
 };
 
-// onMounted artık gerekli değil çünkü veri props'tan geliyor
+// Modal açıldığında manuel değişiklik state'ini sıfırla
+const resetManualChanges = () => {
+  manualChanges.value = {};
+};
+
+// Modal açıldığında çağrılacak
+onMounted(() => {
+  resetManualChanges();
+});
 </script>
 
 <style scoped>

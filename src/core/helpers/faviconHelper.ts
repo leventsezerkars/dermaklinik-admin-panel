@@ -28,7 +28,6 @@ export const saveBase64ToFile = async (
     // Gerçek uygulamada API endpoint'i kullanılmalı
     const fileUrl = URL.createObjectURL(blob);
 
-    console.log("Base64 dosyaya çevrildi:", fileUrl);
     return fileUrl;
   } catch (error) {
     console.error("Base64 dosyaya çevrilirken hata:", error);
@@ -42,17 +41,14 @@ export const saveBase64ToFile = async (
  */
 export const setFaviconFromBase64 = (base64String: string): void => {
   if (!base64String) {
-    console.log("Base64 string boş, favicon güncellenmedi");
     return;
   }
 
   try {
-    console.log("Mevcut favicon'lar kaldırılıyor...");
     // Mevcut favicon'ları kaldır - daha kapsamlı selector
     const existingFavicons = document.querySelectorAll(
       'link[rel*="icon"], link[rel*="shortcut"], link[rel*="apple-touch-icon"]'
     );
-    console.log("Kaldırılan favicon sayısı:", existingFavicons.length);
     existingFavicons.forEach((link) => link.remove());
 
     // Ana favicon (en önemli)
@@ -104,11 +100,6 @@ export const setFaviconFromBase64 = (base64String: string): void => {
       "data:application/json;base64,eyJuYW1lIjoiQXBwIiwiaWNvbnMiOlt7InNyYyI6IiIsInNpemVzIjoiMTkyeDE5MiIsInR5cGUiOiJpbWFnZS9wbmcifV19";
     document.head.appendChild(manifestIcon);
 
-    console.log(
-      "Yeni favicon'lar eklendi:",
-      base64String.substring(0, 50) + "..."
-    );
-
     // Tarayıcı cache'ini temizlemek için timestamp ekle
     setTimeout(() => {
       const timestamp = Date.now();
@@ -131,17 +122,14 @@ export const setFaviconFromBase64 = (base64String: string): void => {
  */
 export const setFaviconFromUrl = (url: string): void => {
   if (!url) {
-    console.log("URL boş, favicon güncellenmedi");
     return;
   }
 
   try {
-    console.log("URL'den favicon güncelleniyor:", url);
     // Mevcut favicon'ları kaldır
     const existingFavicons = document.querySelectorAll(
       'link[rel*="icon"], link[rel*="shortcut"], link[rel*="apple-touch-icon"]'
     );
-    console.log("Kaldırılan favicon sayısı:", existingFavicons.length);
     existingFavicons.forEach((link) => link.remove());
 
     // Ana favicon
@@ -185,8 +173,6 @@ export const setFaviconFromUrl = (url: string): void => {
     shortcutIcon.type = "image/x-icon";
     shortcutIcon.href = url;
     document.head.appendChild(shortcutIcon);
-
-    console.log("URL'den favicon'lar eklendi:", url);
   } catch (error) {
     console.error("URL'den favicon oluşturulurken hata:", error);
   }
@@ -197,12 +183,10 @@ export const setFaviconFromUrl = (url: string): void => {
  */
 export const resetFavicon = (): void => {
   try {
-    console.log("Favicon sıfırlanıyor...");
     // Mevcut favicon'ları kaldır
     const existingFavicons = document.querySelectorAll(
       'link[rel*="icon"], link[rel*="shortcut"]'
     );
-    console.log("Kaldırılan favicon sayısı:", existingFavicons.length);
     existingFavicons.forEach((link) => link.remove());
 
     // Varsayılan favicon'u ekle
@@ -212,7 +196,6 @@ export const resetFavicon = (): void => {
     link.href = "/favicon.ico"; // Varsayılan favicon yolu
 
     document.head.appendChild(link);
-    console.log("Varsayılan favicon eklendi");
   } catch (error) {
     console.error("Favicon sıfırlanırken hata:", error);
   }
@@ -238,20 +221,15 @@ export const isValidImageBase64 = (base64String: string): boolean => {
 export const setCompanyFavicon = async (
   logoUrl: string | null
 ): Promise<void> => {
-  console.log("setCompanyFavicon çağrıldı:", logoUrl);
-
   if (!logoUrl) {
-    console.log("Logo URL yok, varsayılan favicon'a dönülüyor");
     resetFavicon();
     return;
   }
 
   if (isValidImageBase64(logoUrl)) {
-    console.log("Base64 logo tespit edildi, dosyaya çevriliyor...");
     try {
       // Base64'ü dosyaya çevir
       const fileUrl = await saveBase64ToFile(logoUrl, "company-logo.png");
-      console.log("Dosya URL'i oluşturuldu:", fileUrl);
 
       // Dosya URL'ini favicon olarak kullan
       setFaviconFromUrl(fileUrl);
@@ -261,17 +239,8 @@ export const setCompanyFavicon = async (
       setFaviconFromBase64(logoUrl);
     }
   } else if (logoUrl.startsWith("http")) {
-    console.log("HTTP URL logo tespit edildi, favicon güncelleniyor");
     setFaviconFromUrl(logoUrl);
   } else {
     console.warn("Geçersiz logo URL formatı:", logoUrl);
   }
-};
-
-// Test fonksiyonu - browser console'da çağırabilirsiniz
-(window as any).testFavicon = async () => {
-  console.log("Test favicon çağrıldı");
-  const testLogo =
-    "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iNCIgZmlsbD0iIzAwOWVmNyIvPgo8dGV4dCB4PSIxNiIgeT0iMjAiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0id2hpdGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkQ8L3RleHQ+Cjwvc3ZnPgo=";
-  await setCompanyFavicon(testLogo);
 };
