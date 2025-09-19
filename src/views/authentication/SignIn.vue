@@ -1,6 +1,6 @@
 <template>
   <!--begin::Wrapper-->
-  <div class="w-lg-500px bg-white rounded shadow-sm p-10 p-lg-15 mx-auto">
+  <div class="w-lg-600px bg-white rounded-4 shadow p-10 p-lg-15 mx-auto">
     <!--begin::Form-->
     <Form
       class="form w-100"
@@ -9,18 +9,25 @@
       :validation-schema="login"
     >
       <div class="text-center mb-10">
-        <h3 class="text-dark mb-3">Giriş Yap</h3>
+        <h2 class="text-dark mb-2 fw-bolder">Yönetim Paneline Giriş</h2>
+        <div class="text-muted">Hesabınızla oturum açın</div>
       </div>
 
       <div class="fv-row mb-10">
         <label class="form-label fs-6 fw-bolder text-dark">Kullanıcı Adı</label>
 
-        <Field
-          class="form-control form-control-lg form-control-solid"
-          type="text"
-          name="username"
-          autocomplete="off"
-        />
+        <div class="input-group input-group-lg">
+          <span class="input-group-text bg-transparent">
+            <i class="bi bi-person fs-3"></i>
+          </span>
+          <Field
+            class="form-control form-control-lg form-control-solid"
+            type="text"
+            name="username"
+            autocomplete="off"
+            placeholder="E-posta veya kullanıcı adı"
+          />
+        </div>
         <div class="fv-plugins-message-container">
           <div class="fv-help-block">
             <ErrorMessage name="username" />
@@ -37,12 +44,18 @@
           </router-link> -->
         </div>
 
-        <Field
-          class="form-control form-control-lg form-control-solid"
-          type="password"
-          name="password"
-          autocomplete="off"
-        />
+        <div class="input-group input-group-lg">
+          <span class="input-group-text bg-transparent">
+            <i class="bi bi-lock fs-3"></i>
+          </span>
+          <Field
+            class="form-control form-control-lg form-control-solid"
+            type="password"
+            name="password"
+            autocomplete="off"
+            placeholder="Şifre"
+          />
+        </div>
         <div class="fv-plugins-message-container">
           <div class="fv-help-block">
             <ErrorMessage name="password" />
@@ -66,6 +79,9 @@
             ></span>
           </span>
         </button>
+        <div class="text-center text-muted">
+          Şifrenizi mi unuttunuz? Yakında eklenecek.
+        </div>
       </div>
     </Form>
     <!--end::Form-->

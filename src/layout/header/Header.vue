@@ -25,8 +25,8 @@
       </div>
       <!--end::Aside mobile toggle-->
 
-      <!--begin::Mobile logo-->
-      <div class="d-flex align-items-center flex-grow-1 flex-lg-grow-0">
+      <!--begin::Mobile logo (hidden as requested) -->
+      <div class="d-flex align-items-center flex-grow-1 flex-lg-grow-0 d-none">
         <a href="#">
           <img
             :alt="companyName"
@@ -48,8 +48,10 @@
         <!--end::Navbar-->
 
         <!--begin::Topbar-->
-        <div class="d-flex align-items-stretch flex-shrink-0">
-          <KTTopbar></KTTopbar>
+        <div class="d-flex flex-shrink-0">
+          <button class="btn btn-light-danger" @click="confirmLogout">
+            Çıkış Yap
+          </button>
         </div>
         <!--end::Topbar-->
       </div>
@@ -65,6 +67,8 @@ import { defineComponent, computed } from "vue";
 import { useStore } from "vuex";
 import KTTopbar from "@/layout/header/Topbar.vue";
 import KTMenu from "@/layout/header/Menu.vue";
+import { Actions } from "@/store/enums/StoreEnums";
+import Swal from "sweetalert2/dist/sweetalert2.min.js";
 
 import {
   headerWidthFluid,
@@ -78,7 +82,6 @@ export default defineComponent({
     title: String,
   },
   components: {
-    KTTopbar,
     KTMenu,
   },
   setup() {
@@ -89,12 +92,37 @@ export default defineComponent({
       () => store.getters["CompanyInfoModule/companyName"]
     );
 
+    const logout = async () => {
+      await store.dispatch(Actions.LOGOUT, true);
+    };
+
+    const confirmLogout = async () => {
+      const result = await Swal.fire({
+        title: "Çıkış yapılsın mı?",
+        text: "Oturumunuz kapatılacak.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Evet",
+        cancelButtonText: "Vazgeç",
+        buttonsStyling: false,
+        customClass: {
+          confirmButton: "btn btn-danger me-3",
+          cancelButton: "btn btn-light",
+        },
+      });
+      if (result.isConfirmed) {
+        await logout();
+      }
+    };
+
     return {
       headerWidthFluid,
       headerLeft,
       asideDisplay,
       logoUrl,
       companyName,
+      logout,
+      confirmLogout,
     };
   },
 });

@@ -23,6 +23,53 @@
         'print preview anchor insertdatetime media',
         'paste code help wordcount table',
       ],
+      automatic_uploads: true,
+      file_picker_types: 'image',
+      file_picker_callback: (cb, _value, meta) => {
+        if (meta.filetype !== 'image') {
+          return;
+        }
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        input.onchange = async () => {
+          try {
+            const file = input.files && input.files[0];
+            if (!file) return;
+            const created = await GalleryImageService.createImage({
+              ImageFile: file,
+              Title: file.name,
+              AltText: file.name,
+              IsActive: true,
+            });
+            const url = (created as any)?.imageUrl || (created as any)?.data?.imageUrl;
+            if (!url) throw new Error('Resim URL alınamadı');
+            cb(url, { title: file.name });
+          } catch (err) {
+            console.error('Dosya seçerek yükleme başarısız:', err);
+          }
+        };
+        input.click();
+      },
+      images_upload_handler: async (blobInfo, success, failure, _progress) => {
+        try {
+          const blob = blobInfo.blob();
+          const filename = blobInfo.filename();
+          const file = new File([blob], filename, { type: blob.type });
+          const created = await GalleryImageService.createImage({
+            ImageFile: file,
+            Title: filename,
+            AltText: filename,
+            IsActive: true,
+          });
+          const url = (created as any)?.imageUrl || (created as any)?.data?.imageUrl;
+          if (!url) throw new Error('Resim URL alınamadı');
+          success(url);
+        } catch (err) {
+          console.error('Sürükle-bırak/yapıştır ile yükleme başarısız:', err);
+          failure('Yükleme başarısız');
+        }
+      },
       toolbar:
         'undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify' +
         '| bullist numlist outdent indent | link image media | backcolor forecolor |' +
@@ -43,6 +90,7 @@
 <script lang="ts">
 import { defineComponent, computed, ref } from "vue";
 import Editor from "@tinymce/tinymce-vue";
+import GalleryImageService from "@/services/GalleryImageService";
 
 export default defineComponent({
   name: "tiny-editor",
