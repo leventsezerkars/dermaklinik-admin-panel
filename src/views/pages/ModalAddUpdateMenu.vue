@@ -40,6 +40,7 @@
                         @update:model-value="handleChange"
                       >
                         <el-option key="0" label="Sayfa" :value="0" />
+                        <el-option key="1" label="Link" :value="1" />
                         <el-option key="2" label="Kapça" :value="2" />
                       </el-select>
                     </Field>
@@ -62,6 +63,34 @@
                     <div class="fv-plugins-message-container">
                       <div class="fv-help-block">
                         <ErrorMessage name="sortOrder" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Target Input (Link ve Kapça için) -->
+              <div
+                v-if="menuModel.type === 1 || menuModel.type === 2"
+                class="row mb-8"
+              >
+                <div class="col-12">
+                  <div class="fv-row mb-7">
+                    <label class="required fs-6 fw-bold mb-2">Hedef URL</label>
+                    <Field
+                      name="target"
+                      v-model="menuModel.target"
+                      type="text"
+                      class="form-control"
+                      :placeholder="
+                        menuModel.type === 1
+                          ? 'https://example.com'
+                          : 'Kapça için hedef URL'
+                      "
+                    />
+                    <div class="fv-plugins-message-container">
+                      <div class="fv-help-block">
+                        <ErrorMessage name="target" />
                       </div>
                     </div>
                   </div>
@@ -210,9 +239,8 @@
                               {{ language.name }} Slug
                             </label>
                             <input
-                              v-model="
-                                getTranslationByLanguage(language.id).slug
-                              "
+                              :value="getSlugDisplayValue(language.id)"
+                              :key="`slug-${language.id}-${updateCounter}`"
                               type="text"
                               class="form-control"
                               :placeholder="`${language.name} slug`"
@@ -267,6 +295,7 @@
                                 getTranslationByLanguage(language.id)
                                   .seoKeywords
                               "
+                              :key="`keywords-${language.id}-${updateCounter}`"
                               @input="
                                 onKeywordsChange(
                                   language.id,
@@ -344,7 +373,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref, defineProps, computed, defineEmits, watch, onMounted } from "vue";
+import {
+  ref,
+  defineProps,
+  computed,
+  defineEmits,
+  watch,
+  onMounted,
+  nextTick,
+} from "vue";
 import { ErrorMessage, Field, Form } from "vee-validate";
 import { useStore } from "vuex";
 import SwalAlert from "@/core/helpers/swalalert";
@@ -371,6 +408,9 @@ const activeTab = ref<number>(0);
 const manualChanges = ref<{
   [languageId: string]: { keywords: boolean };
 }>({});
+
+// Force update için counter
+const updateCounter = ref(0);
 
 const emitted = defineEmits(["submitted", "update:modelValue"]);
 
@@ -447,9 +487,21 @@ const initializeManualChanges = (languageId: string) => {
   }
 };
 
-// Menü adı değiştiğinde otomatik slug ve anahtar kelime oluştur
-const onTitleChange = (languageId: string, title: string) => {
+// Slug display value (prefix olmadan)
+const getSlugDisplayValue = (languageId: string) => {
   const translation = getTranslationByLanguage(languageId);
+  if (!translation.slug) return "";
+
+  // /hizmetler/ prefix'ini kaldır
+  return translation.slug.replace("/hizmetler/", "");
+};
+
+// Menü adı değiştiğinde otomatik slug ve anahtar kelime oluştur
+const onTitleChange = async (languageId: string, title: string) => {
+  console.log("onTitleChange çağrıldı:", languageId, title);
+  const translation = getTranslationByLanguage(languageId);
+
+  // Title'ı güncelle
   translation.title = title;
 
   // Manuel değişiklik state'ini başlat
@@ -458,14 +510,26 @@ const onTitleChange = (languageId: string, title: string) => {
   // Title değiştiğinde slug ve keywords'i güncelle
   if (title && title.trim()) {
     const { slug, keywords } = generateMenuData(title);
+    console.log("Oluşturulan slug ve keywords:", slug, keywords);
 
     // Slug'ı her zaman güncelle (manuel düzenleme yok)
-    translation.slug = slug;
+    // Menü slug'ları için /hizmetler/ prefix'i ekle
+    translation.slug = `/hizmetler/${slug}`;
 
     // Keywords'i güncelle (manuel değişiklik yapılmadıysa)
     if (!manualChanges.value[languageId].keywords) {
       translation.seoKeywords = keywords;
     }
+
+    console.log("Translation güncellendi:", translation);
+
+    // Vue'nun reaktivitesini tetikle
+    await nextTick();
+    console.log("nextTick sonrası translation:", translation);
+
+    // Force update
+    updateCounter.value++;
+    console.log("Force update tetiklendi:", updateCounter.value);
   }
 };
 
@@ -641,8 +705,10 @@ watch(
 const onSubmit = async (values: any) => {
   const apiValues = { ...menuModel.value, ...values };
 
-  // Target'ı her zaman boş string olarak gönder
-  apiValues.target = "";
+  // Target'ı sadece Link ve Kapça tipi için gönder
+  if (apiValues.type !== 1 && apiValues.type !== 2) {
+    apiValues.target = "";
+  }
 
   // Type 2 (Kapça) ise translations'lardaki content'leri boş yap
   if (apiValues.type === 2 && apiValues.translations) {

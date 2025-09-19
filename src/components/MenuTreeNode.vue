@@ -128,7 +128,7 @@ const getMenuIconClass = (menu: MenuDto): string => {
     case 0:
       return "fas fa-file-alt";
     case 1:
-      return "fas fa-mail-forward";
+      return "fas fa-share";
     case 2:
       return "fas fa-link";
     default:

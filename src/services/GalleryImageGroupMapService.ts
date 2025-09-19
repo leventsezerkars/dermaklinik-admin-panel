@@ -79,7 +79,7 @@ class GalleryImageGroupMapService {
       const response = await ApiService.get<GalleryImageGroupMapDto[]>(
         `${this.baseUrl}${queryParams}`
       );
-      return (response.data.list as unknown as GalleryImageGroupMapDto[]) || [];
+      return (response.data as unknown as GalleryImageGroupMapDto[]) || [];
     } catch (error) {
       console.error("Resim-grup mapping'leri getirilirken hata oluştu:", error);
       throw error;
@@ -92,10 +92,7 @@ class GalleryImageGroupMapService {
       const response = await ApiService.get<GalleryImageGroupMapDto>(
         `${this.baseUrl}/${id}`
       );
-      return (
-        (response.data.entity as GalleryImageGroupMapDto) ||
-        (response.data as GalleryImageGroupMapDto)
-      );
+      return response.data as GalleryImageGroupMapDto;
     } catch (error) {
       console.error("Resim-grup mapping'i getirilirken hata oluştu:", error);
       throw error;
@@ -112,10 +109,7 @@ class GalleryImageGroupMapService {
         this.baseUrl,
         data
       );
-      return (
-        (response.data.entity as GalleryImageGroupMapDto) ||
-        (response.data as GalleryImageGroupMapDto)
-      );
+      return response.data as GalleryImageGroupMapDto;
     } catch (error) {
       console.error("Resim-grup mapping'i oluşturulurken hata oluştu:", error);
       throw error;
@@ -134,10 +128,7 @@ class GalleryImageGroupMapService {
         `${this.baseUrl}/${id}`,
         data
       );
-      return (
-        (response.data.entity as GalleryImageGroupMapDto) ||
-        (response.data as GalleryImageGroupMapDto)
-      );
+      return response.data as GalleryImageGroupMapDto;
     } catch (error) {
       console.error("Resim-grup mapping'i güncellenirken hata oluştu:", error);
       throw error;
@@ -175,7 +166,7 @@ class GalleryImageGroupMapService {
       const response = await ApiService.get<GalleryImageGroupMapDto[]>(
         `${this.baseUrl}/by-image/${imageId}`
       );
-      return (response.data.list as unknown as GalleryImageGroupMapDto[]) || [];
+      return (response.data as unknown as GalleryImageGroupMapDto[]) || [];
     } catch (error) {
       console.error("Resme göre mapping'ler getirilirken hata oluştu:", error);
       throw error;
@@ -190,7 +181,7 @@ class GalleryImageGroupMapService {
       const response = await ApiService.get<GalleryImageGroupMapDto[]>(
         `${this.baseUrl}/by-group/${groupId}`
       );
-      return (response.data.list as unknown as GalleryImageGroupMapDto[]) || [];
+      return (response.data as unknown as GalleryImageGroupMapDto[]) || [];
     } catch (error) {
       console.error("Gruba göre mapping'ler getirilirken hata oluştu:", error);
       throw error;

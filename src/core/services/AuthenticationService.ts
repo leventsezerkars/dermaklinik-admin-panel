@@ -39,7 +39,7 @@ class AuthenticationService {
           UserType: "User",
         };
 
-        return { result: true, entity: userData };
+        return { result: true, data: userData };
       } else {
         return {
           result: false,

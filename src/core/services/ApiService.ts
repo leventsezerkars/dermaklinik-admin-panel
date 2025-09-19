@@ -9,8 +9,6 @@ export interface ApiResponse<T = unknown> {
   errorMessage?: string;
   message?: string;
   statusCode?: string;
-  list?: Array<T>;
-  entity?: T;
   data?: any;
   totalCount?: number;
   hasNext?: boolean;
@@ -167,7 +165,7 @@ class ApiService {
   }
 
   // eslint-disable-next-line
-    
+
   public static get<T>(
     url: string,
     customConfig: AxiosRequestConfig = {}

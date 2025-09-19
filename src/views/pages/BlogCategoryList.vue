@@ -174,7 +174,7 @@ const getBlogCategories = async (model: IPagination = defaultPagination) => {
   try {
     const result = await BlogCategoryService.getAll();
     if (result.result) {
-      blogCategoryTableData.value = result.entity || [];
+      blogCategoryTableData.value = result.data || [];
       pagination.value.total = result.totalCount || 0;
       return result || [];
     } else {

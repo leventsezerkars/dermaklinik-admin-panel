@@ -203,7 +203,7 @@ const getBlogs = async (model: IPagination = defaultPagination) => {
 
     const result = await BlogService.getAll(model);
     if (result.result) {
-      blogTableData.value = result.entity || [];
+      blogTableData.value = result.data || [];
       pagination.value.total = result.totalCount || 0;
       return result || [];
     } else {

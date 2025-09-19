@@ -90,7 +90,7 @@ export default class AuthModule extends VuexModule implements UserAuthInfo {
       });
       return;
     }
-    const item = result.entity!;
+    const item = result.data!;
     const user: User = {
       id: item.UserId,
       email: item.Email,

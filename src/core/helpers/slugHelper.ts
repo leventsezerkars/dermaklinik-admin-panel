@@ -14,7 +14,7 @@ export const turkishToEnglish = (text: string): string => {
     ğ: "g",
     Ğ: "G",
     ı: "i",
-    I: "I",
+    I: "i", // Büyük İ harfi küçük i'ye çevriliyor
     ö: "o",
     Ö: "O",
     ş: "s",

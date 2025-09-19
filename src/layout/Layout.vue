@@ -82,8 +82,6 @@ import {
   themeLightLogo,
   themeDarkLogo,
 } from "@/core/helpers/config";
-import UserService from "@/services/UserService";
-import PermissionService from "@/services/PermissionService";
 
 export default defineComponent({
   name: "theme-layout",
@@ -127,11 +125,6 @@ export default defineComponent({
 
       // Şirket bilgilerini yükle
       store.dispatch("CompanyInfoModule/fetchCompanyInfo");
-
-      // const permission = await UserService.getAuthenticatedUserPermissions();
-      // if (permission.result) {
-      //   PermissionService.save(permission.list as any);
-      // }
 
       shouldRenderContent.value = true;
 

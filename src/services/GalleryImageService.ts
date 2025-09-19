@@ -134,10 +134,7 @@ class GalleryImageService {
       const response = await ApiService.get<GalleryImageDto>(
         `${this.baseUrl}/${id}`
       );
-      return (
-        (response.data.entity as GalleryImageDto) ||
-        (response.data as GalleryImageDto)
-      );
+      return response.data as GalleryImageDto;
     } catch (error) {
       console.error("Resim getirilirken hata oluştu:", error);
       throw error;
@@ -199,10 +196,7 @@ class GalleryImageService {
           },
         }
       );
-      return (
-        (response.data.entity as GalleryImageDto) ||
-        (response.data as GalleryImageDto)
-      );
+      return response.data as GalleryImageDto;
     } catch (error) {
       console.error("Resim oluşturulurken hata oluştu:", error);
       throw error;
@@ -261,10 +255,7 @@ class GalleryImageService {
           },
         }
       );
-      return (
-        (response.data.entity as GalleryImageDto) ||
-        (response.data as GalleryImageDto)
-      );
+      return response.data as GalleryImageDto;
     } catch (error) {
       console.error("Resim güncellenirken hata oluştu:", error);
       if (error instanceof Error) {

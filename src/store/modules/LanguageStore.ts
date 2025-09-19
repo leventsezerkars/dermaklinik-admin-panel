@@ -71,7 +71,7 @@ const languageModule: Module<LanguageState, any> = {
             }
           }
 
-          return result.entity;
+          return result.data;
         }
       } catch (error) {
         console.error("Diller yüklenirken hata:", error);

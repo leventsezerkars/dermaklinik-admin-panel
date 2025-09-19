@@ -79,10 +79,7 @@ class GalleryGroupService {
       const response = await ApiService.get<GalleryGroupDto>(
         `${this.baseUrl}/${id}`
       );
-      return (
-        (response.data.entity as GalleryGroupDto) ||
-        (response.data as GalleryGroupDto)
-      );
+      return response.data as GalleryGroupDto;
     } catch (error) {
       console.error("Galeri grubu getirilirken hata oluştu:", error);
       throw error;
@@ -97,10 +94,7 @@ class GalleryGroupService {
         this.baseUrl,
         data
       );
-      return (
-        (response.data.entity as GalleryGroupDto) ||
-        (response.data as GalleryGroupDto)
-      );
+      return response.data as GalleryGroupDto;
     } catch (error) {
       console.error("Galeri grubu oluşturulurken hata oluştu:", error);
       throw error;
@@ -119,10 +113,7 @@ class GalleryGroupService {
         `${this.baseUrl}/${id}`,
         data
       );
-      return (
-        (response.data.entity as GalleryGroupDto) ||
-        (response.data as GalleryGroupDto)
-      );
+      return response.data as GalleryGroupDto;
     } catch (error) {
       console.error("Galeri grubu güncellenirken hata oluştu:", error);
       throw error;
@@ -169,7 +160,7 @@ class GalleryGroupService {
       const response = await ApiService.get<any[]>(
         `${this.baseUrl}/${groupId}/images${queryParams}`
       );
-      return (response.data.list as any[]) || [];
+      return (response.data as any[]) || [];
     } catch (error) {
       console.error("Gruptaki resimler getirilirken hata oluştu:", error);
       throw error;
