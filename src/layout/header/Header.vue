@@ -48,9 +48,14 @@
         <!--end::Navbar-->
 
         <!--begin::Topbar-->
-        <div class="d-flex flex-shrink-0">
-          <button class="btn btn-light-danger" @click="confirmLogout">
-            Çıkış Yap
+        <div class="d-flex align-items-center flex-shrink-0 me-3">
+          <button
+            class="btn btn-sm btn-danger bg-gradient rounded-pill px-4 shadow-sm d-flex align-items-center gap-2"
+            title="Çıkış Yap"
+            @click="confirmLogout"
+          >
+            <i class="bi bi-box-arrow-right fs-6"></i>
+            <span>Çıkış Yap</span>
           </button>
         </div>
         <!--end::Topbar-->

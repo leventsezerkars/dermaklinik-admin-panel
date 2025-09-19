@@ -1,17 +1,21 @@
 <template>
   <div
-    class="d-flex flex-column flex-column-fluid bgi-position-y-bottom position-x-center bgi-no-repeat bgi-size-cover bgi-attachment-fixed"
+    class="d-flex flex-column flex-column-fluid position-relative bgi-position-y-bottom position-x-center bgi-no-repeat bgi-size-cover bgi-attachment-fixed"
     :style="backgroundStyle"
   >
+    <div
+      class="position-absolute top-0 start-0 w-100 h-100"
+      style="background: rgba(0, 20, 30, 0.35)"
+    ></div>
     <!--begin::Content-->
     <div class="d-flex flex-center flex-column flex-column-fluid p-10 pb-lg-20">
       <!--begin::Logo-->
-      <div class="text-center mb-12">
+      <div class="text-center mb-12" v-if="!isSignIn">
         <img
           v-if="companyLogoUrl"
           :src="companyLogoUrl"
           alt="Logo"
-          class="text-center h-100px"
+          class="text-center h-100px rounded-circle bg-white p-2 shadow-sm"
         />
         <img
           v-else
@@ -19,7 +23,9 @@
           alt="Logo"
           class="text-center h-100px opacity-50"
         />
-        <h1 class="text-center mt-3">Dermatoloji Kliniği Web Control</h1>
+        <h1 class="text-center mt-3 text-white text-shadow">
+          Dermatoloji Kliniği Web Control
+        </h1>
       </div>
       <!--end::Logo-->
 
@@ -31,6 +37,7 @@
 
 <script lang="ts">
 import { defineComponent, onMounted, onUnmounted, ref, computed } from "vue";
+import { useRoute } from "vue-router";
 import { useStore } from "vuex";
 import { Actions } from "@/store/enums/StoreEnums";
 import CompanyInfoService from "@/services/CompanyInfoService";
@@ -41,10 +48,12 @@ export default defineComponent({
   setup() {
     const store = useStore();
     const companyLogoUrl = ref<string>("");
+    const route = useRoute();
 
     const backgroundStyle = computed(() => ({
       backgroundImage:
-        "url('https://images.unsplash.com/photo-1532938911079-1b06ac7ceec7?q=80&w=2940&auto=format&fit=crop')",
+        "url('https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=2940&auto=format&fit=crop')",
+      filter: "none",
     }));
 
     onMounted(() => {
@@ -64,7 +73,9 @@ export default defineComponent({
       store.dispatch(Actions.REMOVE_BODY_CLASSNAME, "bg-body");
     });
 
-    return { companyLogoUrl, backgroundStyle };
+    const isSignIn = computed(() => route.name === "sign-in");
+
+    return { companyLogoUrl, backgroundStyle, isSignIn };
   },
 });
 </script>
