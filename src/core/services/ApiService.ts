@@ -23,7 +23,10 @@ class ApiService {
    */
   private static service: AxiosInstance;
   private static _config: AxiosRequestConfig = {
-    baseURL: "https://localhost:7078",
+    baseURL:
+      (import.meta.env && import.meta.env.VUE_APP_API_URL) ||
+      process.env.VUE_APP_API_URL ||
+      "https://your-production-api-url.com", // Buraya gerçek API URL'nizi yazın
     timeout: 30000,
   };
   /**

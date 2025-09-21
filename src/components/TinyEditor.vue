@@ -1,7 +1,7 @@
 <template>
   <editor
     :id="editorId"
-    api-key="w52wlaxcrgfkp9oz9pp0ejhki1l0mcz123p6f4aamooh5vmk"
+    api-key="5tashobmywd6ipxxscn088jllulcof5dwwiu4e1pdlq1j28a"
     :model-value="$props.modelValue"
     @update:model-value="(value) => $emit('update:modelValue', value)"
     :init="{
