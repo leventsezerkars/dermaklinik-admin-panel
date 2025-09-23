@@ -90,7 +90,16 @@ class ApiService {
     err.status = status;
 
     const errordata = err.response.data;
-    console.log(errordata);
+    console.log("API Error Details:", {
+      status: status,
+      statusText: err.response.statusText,
+      data: errordata,
+      config: {
+        url: err.config?.url,
+        method: err.config?.method,
+        headers: err.config?.headers,
+      },
+    });
     if (!err.response) {
       return Promise.resolve({
         data: {

@@ -6,7 +6,7 @@
     @update:model-value="(value) => $emit('update:modelValue', value)"
     :init="{
       height: sizeComp,
-      menubar: 'insert format table',
+      //menubar: 'insert format table',
       toolbar_mode: 'floating',
       language: 'tr',
       visualblocks_default_state: true,
@@ -18,11 +18,20 @@
       fix_list_elements: true,
       entity_encoding: 'raw',
       plugins: [
-        'advlist autolink lists link image charmap',
-        'searchreplace visualblocks code fullscreen',
-        'print preview anchor insertdatetime media',
-        'paste code help wordcount table',
+        'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
+        'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+        'insertdatetime', 'media', 'table', 'help', 'wordcount'
       ],
+      toolbar:
+        'undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify' +
+        '| bullist numlist outdent indent | link image media | backcolor forecolor |' +
+        customButtons +
+        ' |fullscreen print' +
+        '| preview code codesample help',
+      selector: `#${editorId.value}`,
+      relative_urls: false,
+      remove_script_host: true,
+      images_reuse_filename: true,
       automatic_uploads: true,
       file_picker_types: 'image',
       file_picker_callback: (cb, _value, meta) => {
@@ -70,16 +79,6 @@
           failure('Yükleme başarısız');
         }
       },
-      toolbar:
-        'undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify' +
-        '| bullist numlist outdent indent | link image media | backcolor forecolor |' +
-        customButtons +
-        ' |fullscreen print' +
-        '| preview code codesample help',
-      selector: `#${editorId.value}`,
-      relative_urls: false,
-      remove_script_host: true,
-      images_reuse_filename: true,
       // document_base_url: ,
       //images_upload_url: '',
       ...appendInit,
