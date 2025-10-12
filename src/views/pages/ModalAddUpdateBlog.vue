@@ -26,7 +26,7 @@
             <div class="me-n7 pe-7" id="kt_modal_add_blog_scroll">
               <!-- Genel Bilgiler -->
               <div class="row mb-8">
-                <div class="col-6">
+                <div class="col-8">
                   <div class="fv-row mb-7">
                     <label class="required fs-6 fw-bold mb-2">Kategori</label>
                     <Field
@@ -56,15 +56,17 @@
                     </div>
                   </div>
                 </div>
-                <div class="col-6">
-                  <div class="form-check form-switch">
+                <div class="col-4">
+                  <div
+                    class="form-check form-switch d-flex align-items-center h-100"
+                  >
                     <input
                       class="form-check-input"
                       type="checkbox"
                       v-model="blogModel.isActive"
                       id="isActive"
                     />
-                    <label class="form-check-label" for="isActive">
+                    <label class="form-check-label ms-2" for="isActive">
                       Aktif
                     </label>
                   </div>
@@ -110,7 +112,7 @@
                   <div class="tab-content">
                     <div
                       v-for="(language, index) in languages"
-                      :key="language.id"
+                      :key="`tab-${language.id}-${activeTab}`"
                       class="tab-pane fade"
                       :class="{ 'show active': activeTab === index }"
                       role="tabpanel"
@@ -122,12 +124,19 @@
                               {{ language.name }} Başlık
                             </label>
                             <input
+                              :key="`title-${language.id}-${activeTab}`"
                               v-model="
                                 getTranslationByLanguage(language.id).title
                               "
                               type="text"
                               class="form-control"
                               :placeholder="`${language.name} başlık`"
+                              @input="
+                                onTitleChange(
+                                  language.id,
+                                  ($event.target as HTMLInputElement).value
+                                )
+                              "
                             />
                           </div>
                         </div>
@@ -137,13 +146,18 @@
                               {{ language.name }} Slug
                             </label>
                             <input
+                              :key="`slug-${language.id}-${activeTab}`"
                               v-model="
                                 getTranslationByLanguage(language.id).slug
                               "
                               type="text"
                               class="form-control"
                               :placeholder="`${language.name} slug`"
+                              disabled
                             />
+                            <small class="text-muted">
+                              Slug otomatik olarak başlıktan oluşturulur
+                            </small>
                           </div>
                         </div>
                       </div>
@@ -200,6 +214,8 @@
                           </div>
                         </div>
                       </div>
+                      <!-- Öne Çıkan Resim, Video URL ve Doküman URL alanları şimdilik yorum satırında -->
+                      <!--
                       <div class="row">
                         <div class="col-4">
                           <div class="fv-row mb-7">
@@ -249,6 +265,7 @@
                           </div>
                         </div>
                       </div>
+                      -->
 
                       <!-- İçerik Editörü -->
                       <div class="row">
@@ -313,7 +330,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref, defineProps, computed, defineEmits, watch, onMounted } from "vue";
+import {
+  ref,
+  defineProps,
+  computed,
+  defineEmits,
+  watch,
+  onMounted,
+  nextTick,
+} from "vue";
 import { ErrorMessage, Field, Form } from "vee-validate";
 import { useStore } from "vuex";
 import SwalAlert from "@/core/helpers/swalalert";
@@ -329,6 +354,7 @@ import BlogCategoryService, {
 } from "@/services/BlogCategoryService";
 import { LanguageDto } from "@/services/LanguageService";
 import { getFlagUrl } from "@/core/helpers/languageHelper";
+import { createSlug } from "@/core/helpers/slugHelper";
 import TinyEditor from "@/components/TinyEditor.vue";
 
 const store = useStore();
@@ -413,9 +439,6 @@ const getCategoryName = (category: BlogCategoryDto) => {
 
 const setActiveTab = (index: number) => {
   activeTab.value = index;
-  setTimeout(() => {
-    activeTab.value = index;
-  }, 100);
 };
 
 const getBlogCategories = async () => {
@@ -428,6 +451,60 @@ const getBlogCategories = async () => {
     console.error("Blog kategorileri yüklenirken hata:", error);
   }
 };
+
+// Başlık değiştiğinde otomatik slug oluştur
+const onTitleChange = async (languageId: string, title: string) => {
+  console.log("onTitleChange çağrıldı:", languageId, title);
+  const translation = getTranslationByLanguage(languageId);
+
+  // Title'ı güncelle
+  translation.title = title;
+
+  // Title değiştiğinde slug'ı güncelle
+  if (title && title.trim()) {
+    const slug = createSlug(title);
+    console.log("Oluşturulan slug:", slug);
+
+    // Slug'ı güncelle
+    translation.slug = slug;
+
+    console.log("Translation güncellendi:", translation);
+
+    // Vue'nun reaktivitesini tetikle
+    await nextTick();
+    console.log("nextTick sonrası translation:", translation);
+
+    // Sadece translations array'ini güncelle, tüm modeli değil
+    if (blogModel.value.translations) {
+      const index = blogModel.value.translations.findIndex(
+        (t) => t.languageId === languageId
+      );
+      if (index !== -1) {
+        blogModel.value.translations[index] = { ...translation };
+      }
+    }
+  }
+};
+
+// Başlık değişikliklerini izle ve slug'ı güncelle
+watch(
+  () => blogModel.value.translations?.map((t) => t.title),
+  (newTitles, oldTitles) => {
+    if (newTitles && oldTitles) {
+      newTitles.forEach((title, index) => {
+        if (title && title !== oldTitles[index] && title.trim()) {
+          const translation = blogModel.value.translations?.[index];
+          if (translation) {
+            const slug = createSlug(title);
+            translation.slug = slug;
+            console.log(`Slug güncellendi: ${title} -> ${slug}`);
+          }
+        }
+      });
+    }
+  },
+  { deep: true }
+);
 
 watch(
   () => props.modelValue,

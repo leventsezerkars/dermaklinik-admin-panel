@@ -235,19 +235,30 @@ const deleteBlogCategory = async (blogCategory: BlogCategoryDto) => {
       const deleteResult = await BlogCategoryService.delete(
         blogCategory.id || ""
       );
-      if (deleteResult.result) {
-        SwalAlert.toast("Blog kategorisi başarıyla silindi");
+
+      // API'den gelen response'u kontrol et
+      // Boş result veya result: true ise başarılı
+      if (!deleteResult || deleteResult.result !== false) {
+        SwalAlert.toast("Blog kategorisi başarıyla silindi", "success");
         refreshTrigger.value++;
-        refresh();
+        await refresh();
+        // AsDataTable'ı manuel olarak refresh et
+        if (blogCategoryDataTableRef.value) {
+          blogCategoryDataTableRef.value.refresh();
+        }
       } else {
         SwalAlert.toast(
           "Blog kategorisi silinirken hata oluştu: " +
-            deleteResult.errorMessage,
+            (deleteResult?.errorMessage || "Bilinmeyen hata"),
           "error"
         );
       }
     } catch (error) {
-      SwalAlert.toast("Blog kategorisi silinirken hata oluştu", "error");
+      console.error("Delete error:", error);
+      SwalAlert.toast(
+        "Blog kategorisi silinirken hata oluştu: " + error,
+        "error"
+      );
     } finally {
       loading.value = false;
     }
@@ -262,8 +273,13 @@ const showModal = () => {
 };
 
 const onBlogCategorySubmitted = async () => {
+  console.log("onBlogCategorySubmitted çağrıldı");
   refreshTrigger.value++;
   await refresh();
+  // AsDataTable'ı manuel olarak refresh et
+  if (blogCategoryDataTableRef.value) {
+    blogCategoryDataTableRef.value.refresh();
+  }
 };
 
 const onPageChange = (page: number) => {

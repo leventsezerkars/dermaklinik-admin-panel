@@ -969,18 +969,54 @@ const cancelGroupEdit = () => {
 };
 
 const deleteGroup = async (group: GalleryGroupDto) => {
-  if (!confirm(`${group.name} grubunu silmek istediğinizden emin misiniz?`)) {
-    return;
-  }
+  // Eğer grup aktifse, pasife çek
+  if (group.isActive) {
+    const result = await SwalAlert.confirm({
+      title: "Grubu Pasife Çek",
+      text: `${group.name || "Bu grup"} pasife çekilecek.`,
+      confirmButtonText: "Evet, Pasife Çek",
+      cancelButtonText: "İptal",
+      type: "question",
+    });
 
-  try {
-    await GalleryGroupService.deleteGroup(group.id!);
-    await loadGroups();
-    if (selectedGroup.value?.id === group.id) {
-      selectedGroup.value = null;
+    if (result.isConfirmed) {
+      try {
+        await GalleryGroupService.deleteGroup(group.id!);
+        await loadGroups();
+        if (selectedGroup.value?.id === group.id) {
+          selectedGroup.value = null;
+        }
+        SwalAlert.toast("Grup pasife çekildi", "success");
+      } catch (error) {
+        console.error("Grup pasife çekilirken hata:", error);
+        SwalAlert.toast("Grup pasife çekilirken hata oluştu", "error");
+      }
     }
-  } catch (error) {
-    console.error("Grup silinirken hata:", error);
+  } else {
+    // Eğer grup zaten pasifse, hard delete yap
+    const result = await SwalAlert.confirm({
+      title: "Grubu Kalıcı Olarak Sil",
+      text: `${
+        group.name || "Bu grup"
+      } kalıcı olarak silinecek. Bu işlem geri alınamaz!`,
+      confirmButtonText: "Evet, Kalıcı Olarak Sil",
+      cancelButtonText: "İptal",
+      type: "warning",
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await GalleryGroupService.hardDeleteGroup(group.id!);
+        await loadGroups();
+        if (selectedGroup.value?.id === group.id) {
+          selectedGroup.value = null;
+        }
+        SwalAlert.toast("Grup kalıcı olarak silindi", "success");
+      } catch (error) {
+        console.error("Grup kalıcı olarak silinirken hata:", error);
+        SwalAlert.toast("Grup kalıcı olarak silinirken hata oluştu", "error");
+      }
+    }
   }
 };
 

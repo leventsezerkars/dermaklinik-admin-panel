@@ -271,7 +271,7 @@ const onSubmit = async (values: any) => {
     }
 
     if (data.result) {
-      SwalAlert.toast("İşlem Başarılı");
+      SwalAlert.toast("İşlem Başarılı", "success");
       hideModal(addBlogCategoryModalRef.value);
       emitted("submitted");
     } else {
