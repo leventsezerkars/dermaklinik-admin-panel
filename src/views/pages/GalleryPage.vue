@@ -427,12 +427,22 @@
           </small>
         </div>
         <div class="mb-3">
-          <label class="form-label">Başlık</label>
+          <label class="form-label">Başlık (Türkçe)</label>
           <input
             v-model="imageForm.Title"
             type="text"
             class="form-control"
-            placeholder="Resim başlığı"
+            placeholder="Resim başlığı (Türkçe)"
+            :disabled="loading"
+          />
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Başlık (İngilizce)</label>
+          <input
+            v-model="imageForm.TitleEn"
+            type="text"
+            class="form-control"
+            placeholder="Resim başlığı (İngilizce)"
             :disabled="loading"
           />
         </div>
@@ -741,6 +751,7 @@ const groupForm = reactive<CreateGalleryGroupDto>({
 const imageForm = reactive<CreateGalleryImageDto>({
   ImageFile: undefined,
   Title: "",
+  TitleEn: "",
   AltText: "",
   Caption: "",
   IsActive: true,
@@ -1107,6 +1118,7 @@ const editImage = (image: GalleryImageDto) => {
 
   // Mevcut resim verilerini forma kopyala
   imageForm.Title = image.title || "";
+  imageForm.TitleEn = image.titleEn || "";
   imageForm.AltText = image.altText || "";
   imageForm.Caption = image.caption || "";
   imageForm.IsActive = image.isActive;
@@ -1170,6 +1182,7 @@ const activateImage = async (image: GalleryImageDto) => {
     editingImage.value = image;
     // Form verilerini güncelle
     imageForm.Title = image.title || "";
+    imageForm.TitleEn = image.titleEn || "";
     imageForm.AltText = image.altText || "";
     imageForm.Caption = image.caption || "";
     imageForm.IsActive = true; // Aktife çek
@@ -1227,6 +1240,7 @@ const uploadImage = async () => {
         const imageData: UpdateGalleryImageDto = {
           ImageFile: base64Data,
           Title: imageForm.Title || file.name,
+          TitleEn: imageForm.TitleEn || "",
           AltText: imageForm.AltText || file.name,
           Caption: imageForm.Caption || "",
           IsActive: imageForm.IsActive,
@@ -1242,6 +1256,7 @@ const uploadImage = async () => {
         const imageData: UpdateGalleryImageDto = {
           // ImageFile gönderme - mevcut resim korunacak
           Title: imageForm.Title || editingImage.value.title,
+          TitleEn: imageForm.TitleEn || editingImage.value.titleEn,
           AltText: imageForm.AltText || editingImage.value.altText,
           Caption: imageForm.Caption || editingImage.value.caption,
           IsActive: imageForm.IsActive,
@@ -1262,6 +1277,7 @@ const uploadImage = async () => {
           const imageData: CreateGalleryImageDto = {
             ImageFile: base64Data,
             Title: imageForm.Title || file.name,
+            TitleEn: imageForm.TitleEn || "",
             AltText: imageForm.AltText || file.name,
             Caption: imageForm.Caption || "",
             IsActive: imageForm.IsActive,
@@ -1301,6 +1317,7 @@ const uploadImage = async () => {
 const resetImageForm = () => {
   editingImage.value = null;
   imageForm.Title = "";
+  imageForm.TitleEn = "";
   imageForm.AltText = "";
   imageForm.Caption = "";
   imageForm.IsActive = true;

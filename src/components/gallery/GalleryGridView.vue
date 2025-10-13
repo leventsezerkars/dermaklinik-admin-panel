@@ -88,6 +88,13 @@
           <h6 class="card-title mb-2 fw-bold text-dark">
             {{ image.title || "İsimsiz Resim" }}
           </h6>
+          <!-- İngilizce Başlık -->
+          <h6
+            v-if="image.titleEn"
+            class="card-title mb-2 fw-semibold text-muted small"
+          >
+            {{ image.titleEn }}
+          </h6>
 
           <!-- Açıklama -->
           <p

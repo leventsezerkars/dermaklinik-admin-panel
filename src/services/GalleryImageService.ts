@@ -14,6 +14,7 @@ export type GalleryImageDto = {
   isDeleted: boolean;
   imageUrl?: string;
   title?: string;
+  titleEn?: string;
   altText?: string;
   caption?: string;
   sortOrder?: number;
@@ -30,6 +31,7 @@ export type GalleryImageDto = {
 export type CreateGalleryImageDto = {
   ImageFile?: File | string; // File for upload, string for base64
   Title?: string;
+  TitleEn?: string;
   AltText?: string;
   Caption?: string;
   IsActive: boolean;
@@ -40,6 +42,7 @@ export type UpdateGalleryImageDto = {
   id?: string;
   ImageFile?: File | string; // File for upload, string for base64
   Title?: string;
+  TitleEn?: string;
   AltText?: string;
   Caption?: string;
   IsActive: boolean;
@@ -67,6 +70,7 @@ export type UpdateImageOrderCommand = {
 export const createGalleryImageSchema = yup.object({
   ImageFile: yup.mixed().nullable(),
   Title: yup.string().nullable(),
+  TitleEn: yup.string().nullable(),
   AltText: yup.string().nullable(),
   Caption: yup.string().nullable(),
   IsActive: yup.boolean().required(),
@@ -77,6 +81,7 @@ export const updateGalleryImageSchema = yup.object({
   id: yup.string().uuid().required(),
   ImageFile: yup.mixed().nullable(),
   Title: yup.string().nullable(),
+  TitleEn: yup.string().nullable(),
   AltText: yup.string().nullable(),
   Caption: yup.string().nullable(),
   IsActive: yup.boolean().required(),
@@ -167,6 +172,7 @@ class GalleryImageService {
       }
 
       if (data.Title) formData.append("Title", data.Title);
+      if (data.TitleEn) formData.append("TitleEn", data.TitleEn);
       if (data.AltText) formData.append("AltText", data.AltText);
       if (data.Caption) formData.append("Caption", data.Caption);
       formData.append("IsActive", data.IsActive.toString());
@@ -236,6 +242,7 @@ class GalleryImageService {
       }
 
       if (data.Title) formData.append("Title", data.Title);
+      if (data.TitleEn) formData.append("TitleEn", data.TitleEn);
       if (data.AltText) formData.append("AltText", data.AltText);
       if (data.Caption) formData.append("Caption", data.Caption);
       formData.append("IsActive", data.IsActive.toString());

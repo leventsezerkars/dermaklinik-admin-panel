@@ -47,6 +47,13 @@
                     <h5 class="mb-2 fw-bold text-dark">
                       {{ image.title || "İsimsiz Resim" }}
                     </h5>
+                    <!-- İngilizce Başlık -->
+                    <h6
+                      v-if="image.titleEn"
+                      class="mb-2 fw-semibold text-muted"
+                    >
+                      {{ image.titleEn }}
+                    </h6>
                     <div class="d-flex align-items-center gap-3 mb-2">
                       <small class="text-muted">
                         <i class="fas fa-calendar-alt me-1"></i>
