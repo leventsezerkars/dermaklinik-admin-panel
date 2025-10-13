@@ -216,21 +216,6 @@
               </div>
             </div>
           </div>
-
-          <!-- Durum -->
-          <div class="col-12 mb-5">
-            <div class="form-check form-switch">
-              <input
-                v-model="companyInfo.isActive"
-                class="form-check-input"
-                type="checkbox"
-                id="isActive"
-              />
-              <label class="form-check-label fw-bold" for="isActive">
-                Şirket Bilgileri Aktif
-              </label>
-            </div>
-          </div>
         </div>
 
         <!-- Kaydet Butonu -->
@@ -322,42 +307,6 @@ const removeLogo = () => {
   }
   SwalAlert.toast("Logo kaldırıldı", "info");
 };
-
-const createNewCompany = () => {
-  // Form'u temizle ve yeni kayıt için hazırla
-  Object.assign(companyInfo, {
-    id: "",
-    isActive: true,
-    isDeleted: false,
-    name: "",
-    address: "",
-    phone: "",
-    email: "",
-    logoUrl: "",
-    facebook: "",
-    twitter: "",
-    instagram: "",
-    linkedIn: "",
-    googleMapsUrl: "",
-    googleAnalyticsCode: "",
-    metaTitle: "",
-    metaDescription: "",
-    metaKeywords: "",
-    workingHours: "",
-  });
-
-  // Logo input'unu temizle
-  if (logoInput.value) {
-    logoInput.value.value = "";
-  }
-
-  SwalAlert.toast("Yeni şirket bilgileri formu hazırlandı", "info");
-};
-
-// Store'dan şirket bilgilerini al
-const storeCompanyInfo = computed(
-  () => store.getters["CompanyInfoModule/companyInfo"]
-);
 
 // Şirket bilgilerini yükle
 const loadCompanyInfo = async () => {

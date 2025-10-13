@@ -23,6 +23,7 @@ export type GalleryImageDto = {
     name?: string;
     description?: string;
     isActive?: boolean;
+    sortOrder?: number;
   }>;
 };
 

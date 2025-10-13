@@ -135,6 +135,9 @@
                         class="badge badge-light-info badge-sm"
                       >
                         {{ group.name || "İsimsiz Grup" }}
+                        <span v-if="group.sortOrder" class="ms-1 text-muted">
+                          (#{{ group.sortOrder }})
+                        </span>
                       </span>
                     </div>
                   </div>

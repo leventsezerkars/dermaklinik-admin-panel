@@ -16,6 +16,7 @@ export type GalleryGroupDto = {
   description?: string;
   isDeletable: boolean;
   imageCount?: number;
+  sortOrder?: number;
 };
 
 export type CreateGalleryGroupDto = {
@@ -42,7 +43,7 @@ export const createGalleryGroupSchema = yup.object({
 });
 
 export const updateGalleryGroupSchema = yup.object({
-  id: yup.string().uuid().required(),
+  id: yup.string().required("ID alanı zorunludur"),
   name: yup.string().max(255).nullable(),
   description: yup.string().max(1000).nullable(),
   isDeletable: yup.boolean().required(),

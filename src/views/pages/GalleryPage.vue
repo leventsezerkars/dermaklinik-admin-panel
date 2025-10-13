@@ -351,12 +351,38 @@
   <!-- Resim Yükleme/Düzenleme Modal -->
   <Modal
     id="uploadModal"
-    :header-text="editingImage ? 'Resim Düzenle' : 'Resim Yükle'"
+    :header-text="
+      loading
+        ? editingImage
+          ? 'Resim Güncelleniyor...'
+          : 'Resim Yükleniyor...'
+        : editingImage
+        ? 'Resim Düzenle'
+        : 'Resim Yükle'
+    "
     size="lg"
     ref="uploadModalRef"
   >
     <template #body>
-      <form @submit.prevent="uploadImage">
+      <form @submit.prevent="uploadImage" class="position-relative">
+        <!-- Loading Overlay -->
+        <div
+          v-if="loading"
+          class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-white bg-opacity-75"
+          style="z-index: 10"
+        >
+          <div class="text-center">
+            <div class="spinner-border text-primary mb-3" role="status">
+              <span class="visually-hidden">Yükleniyor...</span>
+            </div>
+            <p class="text-muted">
+              {{
+                editingImage ? "Resim güncelleniyor..." : "Resim yükleniyor..."
+              }}
+            </p>
+          </div>
+        </div>
+
         <!-- Mevcut resim önizlemesi (düzenleme modunda) -->
         <div v-if="editingImage" class="mb-4">
           <label class="form-label">Mevcut Resim</label>
@@ -390,6 +416,7 @@
             multiple
             @change="handleFileSelect"
             :required="!editingImage"
+            :disabled="loading"
           />
           <small class="text-muted">
             {{
@@ -406,6 +433,7 @@
             type="text"
             class="form-control"
             placeholder="Resim başlığı"
+            :disabled="loading"
           />
         </div>
         <div class="mb-3">
@@ -415,6 +443,7 @@
             type="text"
             class="form-control"
             placeholder="Alt text"
+            :disabled="loading"
           />
         </div>
         <div class="mb-3">
@@ -424,6 +453,7 @@
             class="form-control"
             rows="3"
             placeholder="Resim açıklaması"
+            :disabled="loading"
           ></textarea>
         </div>
         <div class="mb-3">
@@ -431,6 +461,7 @@
           <div
             class="border rounded p-3"
             style="max-height: 200px; overflow-y: auto"
+            :class="{ 'opacity-50': loading }"
           >
             <div v-if="groups.length === 0" class="text-muted text-center py-2">
               Henüz grup bulunmuyor
@@ -447,6 +478,7 @@
                   type="checkbox"
                   :value="group.id"
                   :id="'group-' + group.id"
+                  :disabled="loading"
                 />
                 <label
                   class="form-check-label d-flex align-items-center"
@@ -477,6 +509,7 @@
               class="form-check-input"
               type="checkbox"
               id="imageActive"
+              :disabled="loading"
             />
             <label class="form-check-label" for="imageActive"> Aktif </label>
           </div>
@@ -486,11 +519,27 @@
             type="button"
             class="btn btn-secondary"
             @click="uploadModalRef?.hide()"
+            :disabled="loading"
           >
             İptal
           </button>
-          <button type="submit" class="btn btn-primary">
-            {{ editingImage ? "Güncelle" : "Yükle" }}
+          <button type="submit" class="btn btn-primary" :disabled="loading">
+            <span
+              v-if="loading"
+              class="spinner-border spinner-border-sm me-2"
+              role="status"
+            >
+              <span class="visually-hidden">Yükleniyor...</span>
+            </span>
+            {{
+              loading
+                ? editingImage
+                  ? "Güncelleniyor..."
+                  : "Yükleniyor..."
+                : editingImage
+                ? "Güncelle"
+                : "Yükle"
+            }}
           </button>
         </div>
       </form>
@@ -573,7 +622,7 @@
                         {{ group.name || "İsimsiz Grup" }}
                       </span>
                       <small class="text-muted">
-                        Sıra: {{ selectedImageForZoom.sortOrder || 0 }}
+                        Sıra: {{ group.sortOrder || 0 }}
                       </small>
                     </div>
                     <div class="d-flex gap-1">
@@ -582,7 +631,7 @@
                         class="btn btn-outline-primary btn-sm"
                         @click="moveImageUp(selectedImageForZoom, group)"
                         title="Yukarı Taşı"
-                        :disabled="(selectedImageForZoom.sortOrder || 0) <= 1"
+                        :disabled="(group.sortOrder || 0) <= 1"
                       >
                         <i class="fas fa-arrow-up"></i>
                       </button>
@@ -648,14 +697,12 @@ import GalleryImageService, {
   GalleryImageDto,
   CreateGalleryImageDto,
   UpdateGalleryImageDto,
-  AddToGroupCommand,
   UpdateImageOrderCommand,
 } from "@/services/GalleryImageService";
 import GalleryGroupService, {
   GalleryGroupDto,
   CreateGalleryGroupDto,
 } from "@/services/GalleryGroupService";
-import GalleryImageGroupMapService from "@/services/GalleryImageGroupMapService";
 
 // Modal interface
 interface ModalInstance {
@@ -940,7 +987,12 @@ const saveGroup = async () => {
     loading.value = true;
 
     if (editingGroup.value) {
-      await GalleryGroupService.updateGroup(editingGroup.value.id!, groupForm);
+      // Güncelleme için id'yi groupForm'a ekle
+      const updateData = {
+        ...groupForm,
+        id: editingGroup.value.id,
+      };
+      await GalleryGroupService.updateGroup(editingGroup.value.id!, updateData);
     } else {
       const newGroup = await GalleryGroupService.createGroup(groupForm);
     }
@@ -969,11 +1021,19 @@ const cancelGroupEdit = () => {
 };
 
 const deleteGroup = async (group: GalleryGroupDto) => {
-  // Eğer grup aktifse, pasife çek
-  if (group.isActive) {
+  const imageCount = getGroupImageCount(group.id || "");
+  const isActive = group.isActive;
+  const groupName = group.name || "Bu grup";
+
+  // Silme türünü belirle
+  const shouldHardDelete = imageCount === 0 || !isActive;
+  const shouldSoftDelete = imageCount > 0 && isActive;
+
+  if (shouldSoftDelete) {
+    // Resim varsa + aktif = pasife çek
     const result = await SwalAlert.confirm({
       title: "Grubu Pasife Çek",
-      text: `${group.name || "Bu grup"} pasife çekilecek.`,
+      text: `${groupName} içinde ${imageCount} resim bulunduğu için pasife çekilecek. Resimler korunacak.`,
       confirmButtonText: "Evet, Pasife Çek",
       cancelButtonText: "İptal",
       type: "question",
@@ -992,13 +1052,23 @@ const deleteGroup = async (group: GalleryGroupDto) => {
         SwalAlert.toast("Grup pasife çekilirken hata oluştu", "error");
       }
     }
-  } else {
-    // Eğer grup zaten pasifse, hard delete yap
+  } else if (shouldHardDelete) {
+    // Diğer tüm durumlar = hard delete
+    const hasImages = imageCount > 0;
+    const isPassive = !isActive;
+
+    let message = "";
+    if (hasImages && isPassive) {
+      message = `${groupName} pasif durumda ve içinde ${imageCount} resim bulunuyor. Grup ve tüm resimleri kalıcı olarak silinecek. Bu işlem geri alınamaz!`;
+    } else if (!hasImages && isActive) {
+      message = `${groupName} içinde resim bulunmadığı için kalıcı olarak silinecek. Bu işlem geri alınamaz!`;
+    } else {
+      message = `${groupName} pasif durumda ve içinde resim bulunmuyor. Kalıcı olarak silinecek. Bu işlem geri alınamaz!`;
+    }
+
     const result = await SwalAlert.confirm({
       title: "Grubu Kalıcı Olarak Sil",
-      text: `${
-        group.name || "Bu grup"
-      } kalıcı olarak silinecek. Bu işlem geri alınamaz!`,
+      text: message,
       confirmButtonText: "Evet, Kalıcı Olarak Sil",
       cancelButtonText: "İptal",
       type: "warning",
@@ -1011,7 +1081,10 @@ const deleteGroup = async (group: GalleryGroupDto) => {
         if (selectedGroup.value?.id === group.id) {
           selectedGroup.value = null;
         }
-        SwalAlert.toast("Grup kalıcı olarak silindi", "success");
+        const toastMessage = hasImages
+          ? "Grup ve resimleri kalıcı olarak silindi"
+          : "Grup kalıcı olarak silindi";
+        SwalAlert.toast(toastMessage, "success");
       } catch (error) {
         console.error("Grup kalıcı olarak silinirken hata:", error);
         SwalAlert.toast("Grup kalıcı olarak silinirken hata oluştu", "error");
@@ -1059,7 +1132,7 @@ const hardDeleteImage = async (image: GalleryImageDto) => {
   if (result.isConfirmed) {
     try {
       await GalleryImageService.hardDeleteImage(image.id!);
-      await loadImages();
+      await refreshImages();
       SwalAlert.toast("Resim kalıcı olarak silindi", "success");
     } catch (error) {
       console.error("Resim kalıcı olarak silinirken hata:", error);
@@ -1081,7 +1154,7 @@ const deactivateImage = async (image: GalleryImageDto) => {
   if (result.isConfirmed) {
     try {
       await GalleryImageService.deleteImage(image.id!);
-      await loadImages();
+      await refreshImages();
       SwalAlert.toast("Resim pasife çekildi", "success");
     } catch (error) {
       console.error("Resim pasife çekilirken hata:", error);
@@ -1256,7 +1329,8 @@ const editImageFromZoom = (image: GalleryImageDto) => {
 // Resim sıralama fonksiyonları
 const moveImageUp = async (image: GalleryImageDto, group: any) => {
   try {
-    const currentOrder = image.sortOrder || 0;
+    // Resmin o gruptaki mevcut sırasını bul
+    const currentOrder = group.sortOrder || 0;
     if (currentOrder <= 1) return;
 
     console.log("moveImageUp çağrıldı:", {
@@ -1293,7 +1367,8 @@ const moveImageUp = async (image: GalleryImageDto, group: any) => {
 
 const moveImageDown = async (image: GalleryImageDto, group: any) => {
   try {
-    const currentOrder = image.sortOrder || 0;
+    // Resmin o gruptaki mevcut sırasını bul
+    const currentOrder = group.sortOrder || 0;
     const newOrder = currentOrder + 1;
 
     console.log("moveImageDown çağrıldı:", {

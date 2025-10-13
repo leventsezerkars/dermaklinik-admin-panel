@@ -92,6 +92,7 @@ class ApiService {
     const errordata = err.response.data;
     console.log("API Error Details:", {
       status: status,
+      response: err.response,
       statusText: err.response.statusText,
       data: errordata,
       config: {
@@ -127,6 +128,7 @@ class ApiService {
         },
       });
     }
+
     if (err.code === "ERR_BAD_RESPONSE" || status == 500) {
       SwalAlert.toast(errordata.errorMessage, "error");
       return Promise.resolve({
@@ -171,7 +173,7 @@ class ApiService {
     return Promise.resolve({
       data: {
         result: false,
-        errorMessage: "Beklenmeyen bir hata oluştu",
+        errorMessage: errordata.errorMessage,
       },
     });
   }

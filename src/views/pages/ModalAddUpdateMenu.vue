@@ -498,7 +498,6 @@ const getSlugDisplayValue = (languageId: string) => {
 
 // Menü adı değiştiğinde otomatik slug ve anahtar kelime oluştur
 const onTitleChange = async (languageId: string, title: string) => {
-  console.log("onTitleChange çağrıldı:", languageId, title);
   const translation = getTranslationByLanguage(languageId);
 
   // Title'ı güncelle
@@ -510,7 +509,6 @@ const onTitleChange = async (languageId: string, title: string) => {
   // Title değiştiğinde slug ve keywords'i güncelle
   if (title && title.trim()) {
     const { slug, keywords } = generateMenuData(title);
-    console.log("Oluşturulan slug ve keywords:", slug, keywords);
 
     // Slug'ı her zaman güncelle (manuel düzenleme yok)
     // Menü slug'ları için /hizmetler/ prefix'i ekle
@@ -520,8 +518,6 @@ const onTitleChange = async (languageId: string, title: string) => {
     if (!manualChanges.value[languageId].keywords) {
       translation.seoKeywords = keywords;
     }
-
-    console.log("Translation güncellendi:", translation);
 
     // Vue'nun reaktivitesini tetikle
     await nextTick();

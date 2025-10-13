@@ -146,7 +146,7 @@
                               {{ language.name }} Slug
                             </label>
                             <input
-                              :key="`slug-${language.id}-${activeTab}`"
+                              :key="`slug-${language.id}-${updateCounter}`"
                               v-model="
                                 getTranslationByLanguage(language.id).slug
                               "
@@ -347,12 +347,10 @@ import BlogService, {
   BlogDto,
   CreateBlogDto,
   UpdateBlogDto,
-  CreateBlogTranslationDto,
 } from "@/services/BlogService";
 import BlogCategoryService, {
   BlogCategoryDto,
 } from "@/services/BlogCategoryService";
-import { LanguageDto } from "@/services/LanguageService";
 import { getFlagUrl } from "@/core/helpers/languageHelper";
 import { createSlug } from "@/core/helpers/slugHelper";
 import TinyEditor from "@/components/TinyEditor.vue";
@@ -363,6 +361,7 @@ const formRef = ref<null | HTMLElement>(null);
 const loading = ref<boolean>(false);
 const blogCategories = ref<BlogCategoryDto[]>([]);
 const activeTab = ref<number>(0);
+const updateCounter = ref(0);
 
 const emitted = defineEmits(["submitted", "update:modelValue"]);
 
@@ -463,16 +462,11 @@ const onTitleChange = async (languageId: string, title: string) => {
   // Title değiştiğinde slug'ı güncelle
   if (title && title.trim()) {
     const slug = createSlug(title);
-    console.log("Oluşturulan slug:", slug);
 
     // Slug'ı güncelle
     translation.slug = slug;
 
-    console.log("Translation güncellendi:", translation);
-
-    // Vue'nun reaktivitesini tetikle
     await nextTick();
-    console.log("nextTick sonrası translation:", translation);
 
     // Sadece translations array'ini güncelle, tüm modeli değil
     if (blogModel.value.translations) {
@@ -483,28 +477,9 @@ const onTitleChange = async (languageId: string, title: string) => {
         blogModel.value.translations[index] = { ...translation };
       }
     }
+    updateCounter.value++;
   }
 };
-
-// Başlık değişikliklerini izle ve slug'ı güncelle
-watch(
-  () => blogModel.value.translations?.map((t) => t.title),
-  (newTitles, oldTitles) => {
-    if (newTitles && oldTitles) {
-      newTitles.forEach((title, index) => {
-        if (title && title !== oldTitles[index] && title.trim()) {
-          const translation = blogModel.value.translations?.[index];
-          if (translation) {
-            const slug = createSlug(title);
-            translation.slug = slug;
-            console.log(`Slug güncellendi: ${title} -> ${slug}`);
-          }
-        }
-      });
-    }
-  },
-  { deep: true }
-);
 
 watch(
   () => props.modelValue,
