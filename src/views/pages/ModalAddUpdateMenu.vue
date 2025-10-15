@@ -70,10 +70,7 @@
               </div>
 
               <!-- Target Input (Link ve Kapça için) -->
-              <div
-                v-if="menuModel.type === 1 || menuModel.type === 2"
-                class="row mb-8"
-              >
+              <div class="row mb-8">
                 <div class="col-12">
                   <div class="fv-row mb-7">
                     <label class="required fs-6 fw-bold mb-2">Hedef URL</label>
@@ -83,9 +80,11 @@
                       type="text"
                       class="form-control"
                       :placeholder="
-                        menuModel.type === 1
+                        menuModel.type === 0
+                          ? 'hizmetler'
+                          : menuModel.type === 1
                           ? 'https://example.com'
-                          : 'Kapça için hedef URL'
+                          : 'Hedef URL'
                       "
                     />
                     <div class="fv-plugins-message-container">
@@ -492,7 +491,6 @@ const getSlugDisplayValue = (languageId: string) => {
   const translation = getTranslationByLanguage(languageId);
   if (!translation.slug) return "";
 
-  // /hizmetler/ prefix'ini kaldır
   return translation.slug.replace("/hizmetler/", "");
 };
 
@@ -510,9 +508,7 @@ const onTitleChange = async (languageId: string, title: string) => {
   if (title && title.trim()) {
     const { slug, keywords } = generateMenuData(title);
 
-    // Slug'ı her zaman güncelle (manuel düzenleme yok)
-    // Menü slug'ları için /hizmetler/ prefix'i ekle
-    translation.slug = `/hizmetler/${slug}`;
+    translation.slug = slug;
 
     // Keywords'i güncelle (manuel değişiklik yapılmadıysa)
     if (!manualChanges.value[languageId].keywords) {
@@ -670,6 +666,12 @@ watch(
 watch(
   () => menuModel.value.type,
   (newType) => {
+    // Target alanını type'a göre otomatik doldur
+    if (newType === 0) {
+      // Type 0 (Sayfa) ise target'ı "hizmetler" yap
+      menuModel.value.target = "hizmetler";
+    }
+
     if (menuModel.value.translations) {
       if (newType === 2) {
         // Type 2 (Kapça) ise sadece content'i boş yap

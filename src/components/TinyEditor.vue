@@ -23,12 +23,12 @@
         'insertdatetime', 'media', 'table', 'help', 'wordcount'
       ],
       toolbar:
-        'undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify' +
+        'undo redo | formatselect | h1 h2 h3 h4 h5 h6 | bold italic underline strikethrough | alignleft aligncenter alignright alignjustify' +
         '| bullist numlist outdent indent | link image media | backcolor forecolor |' +
         customButtons +
         ' |fullscreen print' +
         '| preview code codesample help',
-      selector: `#${editorId.value}`,
+      selector: `#${editorId}`,
       relative_urls: false,
       remove_script_host: true,
       images_reuse_filename: true,
@@ -119,11 +119,11 @@ export default defineComponent({
 
     const sizeComp = computed<number>(() => {
       return props.size == "small"
-        ? 250
+        ? 300
         : props.size == "medium"
         ? 500
         : props.size == "large"
-        ? 750
+        ? 600
         : 500;
     });
 
