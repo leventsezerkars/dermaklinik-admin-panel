@@ -8,6 +8,16 @@
       height: sizeComp,
       //menubar: 'insert format table',
       toolbar_mode: 'floating',
+      //branding: false,
+      //elementpath: false,
+      //resize: true,
+      //statusbar: true,
+      //menubar: false,
+      //auto_focus: false,
+      //focus: false,
+      //toolbar_mode: 'sliding',
+      //toolbar_sticky: true,
+      //toolbar_sticky_offset: 60,
       language: 'tr',
       visualblocks_default_state: true,
       end_container_on_empty_block: true,
@@ -20,14 +30,16 @@
       plugins: [
         'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
         'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
-        'insertdatetime', 'media', 'table', 'help', 'wordcount'
+        'insertdatetime', 'media', 'table', 'help', 'wordcount', 'codesample'
       ],
       toolbar:
-        'undo redo | formatselect | h1 h2 h3 h4 h5 h6 | bold italic underline strikethrough | alignleft aligncenter alignright alignjustify' +
-        '| bullist numlist outdent indent | link image media | backcolor forecolor |' +
+        'undo redo | formatselect | h1 h2 h3 h4 h5 h6 | bold italic underline strikethrough | forecolor backcolor |' +
+        'alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | blockquote |' +
+        ' removeformat |' +
+        'link image media | table | insertdatetime |' +
+        'code codesample | visualblocks | searchreplace |' +
         customButtons +
-        ' |fullscreen print' +
-        '| preview code codesample help',
+        ' | fullscreen | preview | help',
       selector: `#${editorId}`,
       relative_urls: false,
       remove_script_host: true,
@@ -123,7 +135,7 @@ export default defineComponent({
         : props.size == "medium"
         ? 500
         : props.size == "large"
-        ? 600
+        ? 700
         : 500;
     });
 

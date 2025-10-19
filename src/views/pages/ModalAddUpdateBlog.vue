@@ -6,7 +6,7 @@
     tabindex="-1"
     aria-hidden="true"
   >
-    <div class="modal-dialog modal-dialog-centered mw-1000px">
+    <div class="modal-dialog modal-dialog-centered mw-1200px">
       <div class="modal-content rounded">
         <div class="modal-header" id="kt_modal_add_blog_header">
           <h2>
@@ -24,9 +24,11 @@
         <Form @submit="onSubmit" class="form" ref="formRef">
           <div class="modal-body py-10 px-lg-17">
             <div class="me-n7 pe-7" id="kt_modal_add_blog_scroll">
-              <!-- Genel Bilgiler -->
-              <div class="row mb-8">
-                <div class="col-8">
+              <div class="row">
+                <!-- Sol Taraf: Genel Bilgiler -->
+                <div class="col-4 border-end border-5">
+                  <h4 class="mb-4">Genel Bilgiler</h4>
+
                   <div class="fv-row mb-7">
                     <label class="required fs-6 fw-bold mb-2">Kategori</label>
                     <Field
@@ -55,27 +57,22 @@
                       </div>
                     </div>
                   </div>
-                </div>
-                <div class="col-4">
-                  <div
-                    class="form-check form-switch d-flex align-items-center h-100"
-                  >
+
+                  <div class="form-check form-switch mb-7">
                     <input
                       class="form-check-input"
                       type="checkbox"
                       v-model="blogModel.isActive"
                       id="isActive"
                     />
-                    <label class="form-check-label ms-2" for="isActive">
+                    <label class="form-check-label" for="isActive">
                       Aktif
                     </label>
                   </div>
                 </div>
-              </div>
 
-              <!-- Dil Tabları -->
-              <div class="row">
-                <div class="col-12">
+                <!-- Sağ Taraf: Dil İçerikleri -->
+                <div class="col-8">
                   <h4 class="mb-4">Dil İçerikleri</h4>
 
                   <!-- Tab Navigation -->
@@ -117,180 +114,100 @@
                       :class="{ 'show active': activeTab === index }"
                       role="tabpanel"
                     >
-                      <div class="row">
-                        <div class="col-6">
-                          <div class="fv-row mb-7">
-                            <label class="required fs-6 fw-bold mb-2">
-                              {{ language.name }} Başlık
-                            </label>
-                            <input
-                              :key="`title-${language.id}-${activeTab}`"
-                              v-model="
-                                getTranslationByLanguage(language.id).title
-                              "
-                              type="text"
-                              class="form-control"
-                              :placeholder="`${language.name} başlık`"
-                              @input="
-                                onTitleChange(
-                                  language.id,
-                                  ($event.target as HTMLInputElement).value
-                                )
-                              "
-                            />
-                          </div>
-                        </div>
-                        <div class="col-6">
-                          <div class="fv-row mb-7">
-                            <label class="required fs-6 fw-bold mb-2">
-                              {{ language.name }} Slug
-                            </label>
-                            <input
-                              :key="`slug-${language.id}-${updateCounter}`"
-                              v-model="
-                                getTranslationByLanguage(language.id).slug
-                              "
-                              type="text"
-                              class="form-control"
-                              :placeholder="`${language.name} slug`"
-                              disabled
-                            />
-                            <small class="text-muted">
-                              Slug otomatik olarak başlıktan oluşturulur
-                            </small>
-                          </div>
-                        </div>
+                      <div class="fv-row mb-7">
+                        <label class="required fs-6 fw-bold mb-2">
+                          {{ language.name }} Başlık
+                        </label>
+                        <input
+                          :key="`title-${language.id}-${activeTab}`"
+                          v-model="getTranslationByLanguage(language.id).title"
+                          type="text"
+                          class="form-control"
+                          :placeholder="`${language.name} başlık`"
+                          @input="
+                            onTitleChange(
+                              language.id,
+                              ($event.target as HTMLInputElement).value
+                            )
+                          "
+                        />
                       </div>
-                      <div class="row">
-                        <div class="col-12">
-                          <div class="fv-row mb-7">
-                            <label class="fs-6 fw-bold mb-2">
-                              {{ language.name }} SEO Başlık
-                            </label>
-                            <input
-                              v-model="
-                                getTranslationByLanguage(language.id).seoTitle
-                              "
-                              type="text"
-                              class="form-control"
-                              :placeholder="`${language.name} SEO başlık`"
-                            />
-                          </div>
-                        </div>
+
+                      <div class="fv-row mb-7">
+                        <label class="fs-6 fw-bold mb-2">
+                          {{ language.name }} Slug
+                        </label>
+                        <input
+                          :key="`slug-${language.id}-${updateCounter}`"
+                          v-model="getTranslationByLanguage(language.id).slug"
+                          type="text"
+                          class="form-control"
+                          :placeholder="`${language.name} slug`"
+                          disabled
+                        />
+                        <small class="text-muted">
+                          Slug otomatik olarak başlıktan oluşturulur
+                        </small>
                       </div>
-                      <div class="row">
-                        <div class="col-12">
-                          <div class="fv-row mb-7">
-                            <label class="fs-6 fw-bold mb-2">
-                              {{ language.name }} SEO Açıklama
-                            </label>
-                            <textarea
-                              v-model="
-                                getTranslationByLanguage(language.id)
-                                  .seoDescription
-                              "
-                              class="form-control"
-                              rows="3"
-                              :placeholder="`${language.name} SEO açıklama`"
-                            ></textarea>
-                          </div>
-                        </div>
+
+                      <div class="fv-row mb-7">
+                        <label class="fs-6 fw-bold mb-2">
+                          {{ language.name }} SEO Başlık
+                        </label>
+                        <input
+                          v-model="
+                            getTranslationByLanguage(language.id).seoTitle
+                          "
+                          type="text"
+                          class="form-control"
+                          :placeholder="`${language.name} SEO başlık`"
+                        />
                       </div>
-                      <div class="row">
-                        <div class="col-12">
-                          <div class="fv-row mb-7">
-                            <label class="fs-6 fw-bold mb-2">
-                              {{ language.name }} SEO Anahtar Kelimeler
-                            </label>
-                            <input
-                              v-model="
-                                getTranslationByLanguage(language.id)
-                                  .seoKeywords
-                              "
-                              type="text"
-                              class="form-control"
-                              :placeholder="`${language.name} anahtar kelimeler, virgülle ayrılmış`"
-                            />
-                          </div>
-                        </div>
+
+                      <div class="fv-row mb-7">
+                        <label class="fs-6 fw-bold mb-2">
+                          {{ language.name }} SEO Açıklama
+                        </label>
+                        <textarea
+                          v-model="
+                            getTranslationByLanguage(language.id).seoDescription
+                          "
+                          class="form-control"
+                          rows="3"
+                          :placeholder="`${language.name} SEO açıklama`"
+                        ></textarea>
                       </div>
-                      <!-- Öne Çıkan Resim, Video URL ve Doküman URL alanları şimdilik yorum satırında -->
-                      <!--
-                      <div class="row">
-                        <div class="col-4">
-                          <div class="fv-row mb-7">
-                            <label class="fs-6 fw-bold mb-2">
-                              {{ language.name }} Öne Çıkan Resim
-                            </label>
-                            <input
-                              v-model="
-                                getTranslationByLanguage(language.id)
-                                  .featuredImage
-                              "
-                              type="text"
-                              class="form-control"
-                              :placeholder="`${language.name} resim URL`"
-                            />
-                          </div>
-                        </div>
-                        <div class="col-4">
-                          <div class="fv-row mb-7">
-                            <label class="fs-6 fw-bold mb-2">
-                              {{ language.name }} Video URL
-                            </label>
-                            <input
-                              v-model="
-                                getTranslationByLanguage(language.id).videoUrl
-                              "
-                              type="text"
-                              class="form-control"
-                              :placeholder="`${language.name} video URL`"
-                            />
-                          </div>
-                        </div>
-                        <div class="col-4">
-                          <div class="fv-row mb-7">
-                            <label class="fs-6 fw-bold mb-2">
-                              {{ language.name }} Doküman URL
-                            </label>
-                            <input
-                              v-model="
-                                getTranslationByLanguage(language.id)
-                                  .documentUrl
-                              "
-                              type="text"
-                              class="form-control"
-                              :placeholder="`${language.name} doküman URL`"
-                            />
-                          </div>
-                        </div>
+
+                      <div class="fv-row mb-7">
+                        <label class="fs-6 fw-bold mb-2">
+                          {{ language.name }} SEO Anahtar Kelimeler
+                        </label>
+                        <input
+                          v-model="
+                            getTranslationByLanguage(language.id).seoKeywords
+                          "
+                          type="text"
+                          class="form-control"
+                          :placeholder="`${language.name} anahtar kelimeler, virgülle ayrılmış`"
+                        />
                       </div>
-                      -->
 
                       <!-- İçerik Editörü -->
-                      <div class="row">
-                        <div class="col-12">
-                          <div class="fv-row mb-7">
-                            <label class="required fs-6 fw-bold mb-2">
-                              {{ language.name }} İçerik
-                            </label>
-                            <div class="content-editor-wrapper">
-                              <TinyEditor
-                                :key="`editor-${language.id}-${activeTab}`"
-                                v-model="
-                                  getTranslationByLanguage(language.id).content
-                                "
-                                size="medium"
-                                :append-init="{
-                                  placeholder: `${language.name} içerik yazın...`,
-                                  branding: false,
-                                  elementpath: false,
-                                  resize: false,
-                                  statusbar: false,
-                                }"
-                              />
-                            </div>
-                          </div>
+                      <div class="fv-row mb-7">
+                        <label class="required fs-6 fw-bold mb-2">
+                          {{ language.name }} İçerik
+                        </label>
+                        <div class="content-editor-wrapper">
+                          <TinyEditor
+                            :key="`editor-${language.id}-${activeTab}`"
+                            v-model="
+                              getTranslationByLanguage(language.id).content
+                            "
+                            size="large"
+                            :append-init="{
+                              placeholder: `${language.name} içerik yazın...`,
+                            }"
+                          />
                         </div>
                       </div>
                     </div>
@@ -583,6 +500,8 @@ onMounted(() => {
   border-radius: 8px;
   overflow: hidden;
   background: #fff;
+  min-height: 500px;
+  height: auto;
 }
 
 .content-editor-wrapper :deep(.tox-tinymce) {
@@ -609,7 +528,7 @@ onMounted(() => {
 
 /* Modal boyutunu büyüt */
 .modal-dialog {
-  max-width: 1000px !important;
+  max-width: 1200px !important;
 }
 
 /* Tab içeriği için scroll */

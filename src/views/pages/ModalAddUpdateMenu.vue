@@ -6,7 +6,7 @@
     tabindex="-1"
     aria-hidden="true"
   >
-    <div class="modal-dialog modal-dialog-centered mw-1000px">
+    <div class="modal-dialog modal-dialog-centered mw-1200px">
       <div class="modal-content rounded">
         <div class="modal-header" id="kt_modal_add_menu_header">
           <h2>{{ isEdit ? "Menü Düzenle" : "Yeni Menü Oluştur" }}</h2>
@@ -22,153 +22,167 @@
         <Form @submit="onSubmit" class="form" ref="formRef">
           <div class="modal-body py-10 px-lg-17">
             <div class="me-n7 pe-7" id="kt_modal_add_menu_scroll">
-              <!-- Genel Bilgiler -->
-              <div class="row mb-8">
-                <div class="col-6">
-                  <div class="fv-row mb-7">
-                    <label class="required fs-6 fw-bold mb-2">Menü Tipi</label>
-                    <Field
-                      name="type"
-                      v-model="menuModel.type"
-                      v-slot="{ field, value, handleChange }"
-                    >
-                      <el-select
-                        placeholder="Menü tipi seçiniz"
-                        no-data-text="Veri Yok"
-                        v-bind="field"
-                        :model-value="value"
-                        @update:model-value="handleChange"
-                      >
-                        <el-option key="0" label="Sayfa" :value="0" />
-                        <el-option key="1" label="Link" :value="1" />
-                        <el-option key="2" label="Kapça" :value="2" />
-                      </el-select>
-                    </Field>
-                    <div class="fv-plugins-message-container">
-                      <div class="fv-help-block">
-                        <ErrorMessage name="type" />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div class="col-6">
-                  <div class="fv-row mb-7">
-                    <label class="required fs-6 fw-bold mb-2">Sıralama</label>
-                    <Field
-                      name="sortOrder"
-                      v-model="menuModel.sortOrder"
-                      type="number"
-                      class="form-control"
-                    />
-                    <div class="fv-plugins-message-container">
-                      <div class="fv-help-block">
-                        <ErrorMessage name="sortOrder" />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Target Input (Link ve Kapça için) -->
-              <div class="row mb-8">
-                <div class="col-12">
-                  <div class="fv-row mb-7">
-                    <label class="required fs-6 fw-bold mb-2">Hedef URL</label>
-                    <Field
-                      name="target"
-                      v-model="menuModel.target"
-                      type="text"
-                      class="form-control"
-                      :placeholder="
-                        menuModel.type === 0
-                          ? 'hizmetler'
-                          : menuModel.type === 1
-                          ? 'https://example.com'
-                          : 'Hedef URL'
-                      "
-                    />
-                    <div class="fv-plugins-message-container">
-                      <div class="fv-help-block">
-                        <ErrorMessage name="target" />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="row mb-8">
-                <div class="col-12">
-                  <div class="fv-row mb-7">
-                    <label class="fs-6 fw-bold mb-2">Üst Menü</label>
-                    <Field
-                      name="parentId"
-                      v-model="menuModel.parentId"
-                      v-slot="{ field, value, handleChange }"
-                    >
-                      <el-select
-                        placeholder="Üst menü seçiniz"
-                        no-data-text="Veri Yok"
-                        v-bind="field"
-                        :model-value="value"
-                        @update:model-value="handleChange"
-                        clearable
-                      >
-                        <el-option
-                          v-for="menu in sortedParentMenus"
-                          :key="menu.id"
-                          :label="getMenuTitleWithLevel(menu)"
-                          :value="menu.id"
-                        />
-                      </el-select>
-                    </Field>
-                    <div class="fv-plugins-message-container">
-                      <div class="fv-help-block">
-                        <ErrorMessage name="parentId" />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="row mb-8">
-                <div class="col-6">
-                  <div class="form-check form-switch">
-                    <input
-                      class="form-check-input"
-                      type="checkbox"
-                      v-model="menuModel.isActive"
-                      id="isActive"
-                    />
-                    <label class="form-check-label" for="isActive">
-                      Aktif
-                    </label>
-                  </div>
-                </div>
-                <div class="col-6">
-                  <div class="form-check form-switch mb-8">
-                    <input
-                      class="form-check-input"
-                      type="checkbox"
-                      v-model="menuModel.isDeletable"
-                      id="isDeletable"
-                      :disabled="isEdit && !menuModel.isDeletable"
-                    />
-                    <label class="form-check-label" for="isDeletable">
-                      Silinebilir
-                    </label>
-                    <div
-                      v-if="isEdit && !menuModel.isDeletable"
-                      class="form-text text-muted"
-                    >
-                      Bu menü silinemez
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Dil Tabları -->
               <div class="row">
-                <div class="col-12">
+                <!-- Sol Taraf: Genel Bilgiler -->
+                <div class="col-4 border-end border-5">
+                  <h4 class="mb-4">Genel Bilgiler</h4>
+
+                  <!-- Genel Bilgiler -->
+                  <div class="row mb-8">
+                    <div class="col-12">
+                      <div class="fv-row mb-7">
+                        <label class="required fs-6 fw-bold mb-2"
+                          >Menü Tipi</label
+                        >
+                        <Field
+                          name="type"
+                          v-model="menuModel.type"
+                          v-slot="{ field, value, handleChange }"
+                        >
+                          <el-select
+                            placeholder="Menü tipi seçiniz"
+                            no-data-text="Veri Yok"
+                            v-bind="field"
+                            :model-value="value"
+                            @update:model-value="handleChange"
+                          >
+                            <el-option key="0" label="Sayfa" :value="0" />
+                            <el-option key="1" label="Link" :value="1" />
+                            <el-option key="2" label="Kapça" :value="2" />
+                          </el-select>
+                        </Field>
+                        <div class="fv-plugins-message-container">
+                          <div class="fv-help-block">
+                            <ErrorMessage name="type" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="row mb-8">
+                    <div class="col-12">
+                      <div class="fv-row mb-7">
+                        <label class="required fs-6 fw-bold mb-2"
+                          >Sıralama</label
+                        >
+                        <Field
+                          name="sortOrder"
+                          v-model="menuModel.sortOrder"
+                          type="number"
+                          class="form-control"
+                        />
+                        <div class="fv-plugins-message-container">
+                          <div class="fv-help-block">
+                            <ErrorMessage name="sortOrder" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Target Input (Link ve Kapça için) -->
+                  <div class="row mb-8">
+                    <div class="col-12">
+                      <div class="fv-row mb-7">
+                        <label class="required fs-6 fw-bold mb-2"
+                          >Hedef URL</label
+                        >
+                        <Field
+                          name="target"
+                          v-model="menuModel.target"
+                          type="text"
+                          class="form-control"
+                          :placeholder="
+                            menuModel.type === 0
+                              ? 'hizmetler'
+                              : menuModel.type === 1
+                              ? 'https://example.com'
+                              : 'Hedef URL'
+                          "
+                        />
+                        <div class="fv-plugins-message-container">
+                          <div class="fv-help-block">
+                            <ErrorMessage name="target" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="row mb-8">
+                    <div class="col-12">
+                      <div class="fv-row mb-7">
+                        <label class="fs-6 fw-bold mb-2">Üst Menü</label>
+                        <Field
+                          name="parentId"
+                          v-model="menuModel.parentId"
+                          v-slot="{ field, value, handleChange }"
+                        >
+                          <el-select
+                            placeholder="Üst menü seçiniz"
+                            no-data-text="Veri Yok"
+                            v-bind="field"
+                            :model-value="value"
+                            @update:model-value="handleChange"
+                            clearable
+                          >
+                            <el-option
+                              v-for="menu in sortedParentMenus"
+                              :key="menu.id"
+                              :label="getMenuTitleWithLevel(menu)"
+                              :value="menu.id"
+                            />
+                          </el-select>
+                        </Field>
+                        <div class="fv-plugins-message-container">
+                          <div class="fv-help-block">
+                            <ErrorMessage name="parentId" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="row mb-8">
+                    <div class="col-6">
+                      <div class="form-check form-switch">
+                        <input
+                          class="form-check-input"
+                          type="checkbox"
+                          v-model="menuModel.isActive"
+                          id="isActive"
+                        />
+                        <label class="form-check-label" for="isActive">
+                          Aktif
+                        </label>
+                      </div>
+                    </div>
+                    <div class="col-6">
+                      <div class="form-check form-switch mb-8">
+                        <input
+                          class="form-check-input"
+                          type="checkbox"
+                          v-model="menuModel.isDeletable"
+                          id="isDeletable"
+                          :disabled="isEdit && !menuModel.isDeletable"
+                        />
+                        <label class="form-check-label" for="isDeletable">
+                          Silinebilir
+                        </label>
+                        <div
+                          v-if="isEdit && !menuModel.isDeletable"
+                          class="form-text text-muted"
+                        >
+                          Bu menü silinemez
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Sağ Taraf: Dil İçerikleri -->
+                <div class="col-8">
                   <h4 class="mb-4">Dil İçerikleri</h4>
 
                   <!-- Tab Navigation -->
@@ -210,129 +224,103 @@
                       :class="{ 'show active': activeTab === index }"
                       role="tabpanel"
                     >
-                      <div class="row">
-                        <div class="col-6">
-                          <div class="fv-row mb-7">
-                            <label class="required fs-6 fw-bold mb-2">
-                              {{ language.name }} Menü Adı
-                            </label>
-                            <input
-                              v-model="
-                                getTranslationByLanguage(language.id).title
-                              "
-                              @input="
-                                onTitleChange(
-                                  language.id,
-                                  ($event.target as HTMLInputElement).value
-                                )
-                              "
-                              type="text"
-                              class="form-control"
-                              :placeholder="`${language.name} menü adı`"
-                            />
-                          </div>
-                        </div>
-                        <div class="col-6">
-                          <div class="fv-row mb-7">
-                            <label class="fs-6 fw-bold mb-2">
-                              {{ language.name }} Slug
-                            </label>
-                            <input
-                              :value="getSlugDisplayValue(language.id)"
-                              :key="`slug-${language.id}-${updateCounter}`"
-                              type="text"
-                              class="form-control"
-                              :placeholder="`${language.name} slug`"
-                              disabled
-                            />
-                          </div>
-                        </div>
+                      <div class="fv-row mb-7">
+                        <label class="required fs-6 fw-bold mb-2">
+                          {{ language.name }} Menü Adı
+                        </label>
+                        <input
+                          v-model="getTranslationByLanguage(language.id).title"
+                          @input="
+                            onTitleChange(
+                              language.id,
+                              ($event.target as HTMLInputElement).value
+                            )
+                          "
+                          type="text"
+                          class="form-control"
+                          :placeholder="`${language.name} menü adı`"
+                        />
                       </div>
-                      <div class="row">
-                        <div class="col-12">
-                          <div class="fv-row mb-7">
-                            <label class="fs-6 fw-bold mb-2">
-                              {{ language.name }} SEO Başlık
-                            </label>
-                            <input
-                              v-model="
-                                getTranslationByLanguage(language.id).seoTitle
-                              "
-                              type="text"
-                              class="form-control"
-                              :placeholder="`${language.name} SEO başlık`"
-                            />
-                          </div>
-                        </div>
+
+                      <div class="fv-row mb-7">
+                        <label class="fs-6 fw-bold mb-2">
+                          {{ language.name }} Slug
+                        </label>
+                        <input
+                          :value="getSlugDisplayValue(language.id)"
+                          :key="`slug-${language.id}-${updateCounter}`"
+                          type="text"
+                          class="form-control"
+                          :placeholder="`${language.name} slug`"
+                          disabled
+                        />
                       </div>
-                      <div class="row">
-                        <div class="col-12">
-                          <div class="fv-row mb-7">
-                            <label class="fs-6 fw-bold mb-2">
-                              {{ language.name }} SEO Açıklama
-                            </label>
-                            <textarea
-                              v-model="
-                                getTranslationByLanguage(language.id)
-                                  .seoDescription
-                              "
-                              class="form-control"
-                              rows="3"
-                              :placeholder="`${language.name} SEO açıklama`"
-                            ></textarea>
-                          </div>
-                        </div>
+
+                      <div class="fv-row mb-7">
+                        <label class="fs-6 fw-bold mb-2">
+                          {{ language.name }} SEO Başlık
+                        </label>
+                        <input
+                          v-model="
+                            getTranslationByLanguage(language.id).seoTitle
+                          "
+                          type="text"
+                          class="form-control"
+                          :placeholder="`${language.name} SEO başlık`"
+                        />
                       </div>
-                      <div class="row">
-                        <div class="col-12">
-                          <div class="fv-row mb-7">
-                            <label class="fs-6 fw-bold mb-2">
-                              {{ language.name }} SEO Anahtar Kelimeler
-                            </label>
-                            <input
-                              v-model="
-                                getTranslationByLanguage(language.id)
-                                  .seoKeywords
-                              "
-                              :key="`keywords-${language.id}-${updateCounter}`"
-                              @input="
-                                onKeywordsChange(
-                                  language.id,
-                                  ($event.target as HTMLInputElement).value
-                                )
-                              "
-                              type="text"
-                              class="form-control"
-                              :placeholder="`${language.name} anahtar kelimeler, virgülle ayrılmış`"
-                            />
-                          </div>
-                        </div>
+
+                      <div class="fv-row mb-7">
+                        <label class="fs-6 fw-bold mb-2">
+                          {{ language.name }} SEO Açıklama
+                        </label>
+                        <textarea
+                          v-model="
+                            getTranslationByLanguage(language.id).seoDescription
+                          "
+                          class="form-control"
+                          rows="3"
+                          :placeholder="`${language.name} SEO açıklama`"
+                        ></textarea>
+                      </div>
+
+                      <div class="fv-row mb-7">
+                        <label class="fs-6 fw-bold mb-2">
+                          {{ language.name }} SEO Anahtar Kelimeler
+                        </label>
+                        <input
+                          v-model="
+                            getTranslationByLanguage(language.id).seoKeywords
+                          "
+                          :key="`keywords-${language.id}-${updateCounter}`"
+                          @input="
+                            onKeywordsChange(
+                              language.id,
+                              ($event.target as HTMLInputElement).value
+                            )
+                          "
+                          type="text"
+                          class="form-control"
+                          :placeholder="`${language.name} anahtar kelimeler, virgülle ayrılmış`"
+                        />
                       </div>
 
                       <!-- İçerik Editörü -->
-                      <div v-if="menuModel.type !== 2" class="row">
-                        <div class="col-12">
-                          <div class="fv-row mb-7">
-                            <label class="fs-6 fw-bold mb-2">
-                              {{ language.name }} İçerik
-                            </label>
-                            <div class="content-editor-wrapper">
-                              <TinyEditor
-                                :key="`editor-${language.id}-${activeTab}`"
-                                v-model="
-                                  getTranslationByLanguage(language.id).content
-                                "
-                                size="medium"
-                                :append-init="{
-                                  placeholder: `${language.name} içerik yazın...`,
-                                  branding: false,
-                                  elementpath: false,
-                                  resize: false,
-                                  statusbar: false,
-                                }"
-                              />
-                            </div>
-                          </div>
+                      <div v-if="menuModel.type !== 2" class="fv-row mb-7">
+                        <label class="fs-6 fw-bold mb-2">
+                          {{ language.name }} İçerik
+                        </label>
+                        <div class="content-editor-wrapper">
+                          <TinyEditor
+                            :key="`editor-${language.id}-${activeTab}`"
+                            v-model="
+                              getTranslationByLanguage(language.id).content
+                            "
+                            size="large"
+                            :append-init="{
+                              placeholder: `${language.name} içerik yazın...`,
+                            }"
+                          />
                         </div>
                       </div>
                     </div>
@@ -778,6 +766,8 @@ onMounted(() => {
   border-radius: 8px;
   overflow: hidden;
   background: #fff;
+  min-height: 500px;
+  height: auto;
 }
 
 .content-editor-wrapper :deep(.tox-tinymce) {
@@ -804,7 +794,7 @@ onMounted(() => {
 
 /* Modal boyutunu büyüt */
 .modal-dialog {
-  max-width: 1000px !important;
+  max-width: 1200px !important;
 }
 
 /* Tab içeriği için scroll */
