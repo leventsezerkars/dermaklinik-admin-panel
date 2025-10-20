@@ -123,6 +123,12 @@ class GalleryImageService {
     groupId?: string;
   }): Promise<GalleryImageDto[]> {
     try {
+      params = params || {};
+      params.take = 1000;
+      params.page = 1;
+      params.orderBy = "createdAt";
+      params.direction = "desc";
+
       const queryParams = toQueryString(params);
       const response = await ApiService.get<GalleryImageDto[]>(
         `${this.baseUrl}?${queryParams}`
