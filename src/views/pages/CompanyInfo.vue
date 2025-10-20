@@ -240,13 +240,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, reactive, computed } from "vue";
+import { ref, onMounted, reactive } from "vue";
 import { useStore } from "vuex";
-import CompanyInfoService, {
-  type CompanyInfoDto,
-  type CreateCompanyInfoDto,
-  type UpdateCompanyInfoDto,
-} from "@/services/CompanyInfoService";
+import { CompanyInfoDto } from "@/services/CompanyInfoService";
+import { setCurrentPageBreadcrumbs } from "@/core/helpers/breadcrumb";
 import { validateAndConvertLogo } from "@/core/helpers/fileHelper";
 import SwalAlert from "@/core/helpers/swalalert";
 const store = useStore();
@@ -381,6 +378,7 @@ const saveCompanyInfo = async () => {
 
 // Sayfa yüklendiğinde şirket bilgilerini getir
 onMounted(() => {
+  setCurrentPageBreadcrumbs("Şirket Bilgileri", ["Şirket Bilgileri"]);
   loadCompanyInfo();
 });
 </script>

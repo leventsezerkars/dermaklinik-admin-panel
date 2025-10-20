@@ -703,6 +703,7 @@ import GalleryGridView from "@/components/gallery/GalleryGridView.vue";
 import GalleryListView from "@/components/gallery/GalleryListView.vue";
 import { validateAndConvertLogo } from "@/core/helpers/fileHelper";
 import SwalAlert from "@/core/helpers/swalalert";
+import { setCurrentPageBreadcrumbs } from "@/core/helpers/breadcrumb";
 import GalleryImageService, {
   GalleryImageDto,
   CreateGalleryImageDto,
@@ -1429,6 +1430,7 @@ watch(sortOrder, () => {
 // Lifecycle
 onMounted(async () => {
   try {
+    setCurrentPageBreadcrumbs("Galeri", ["Galeri"]);
     loading.value = true;
     await Promise.all([loadGroups(), loadImages()]);
   } catch (error) {
