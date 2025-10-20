@@ -198,15 +198,13 @@
                           {{ language.name }} İçerik
                         </label>
                         <div class="content-editor-wrapper">
-                          <TinyEditor
+                          <QuillEditor
                             :key="`editor-${language.id}-${activeTab}`"
                             v-model="
                               getTranslationByLanguage(language.id).content
                             "
                             size="large"
-                            :append-init="{
-                              placeholder: `${language.name} içerik yazın...`,
-                            }"
+                            :placeholder="`${language.name} içerik yazın...`"
                           />
                         </div>
                       </div>
@@ -270,7 +268,7 @@ import BlogCategoryService, {
 } from "@/services/BlogCategoryService";
 import { getFlagUrl } from "@/core/helpers/languageHelper";
 import { createSlug } from "@/core/helpers/slugHelper";
-import TinyEditor from "@/components/TinyEditor.vue";
+import QuillEditor from "@/components/QuillEditor.vue";
 
 const store = useStore();
 const addBlogModalRef = ref<null | HTMLElement>(null);
