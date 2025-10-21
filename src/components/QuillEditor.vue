@@ -61,12 +61,30 @@ export default defineComponent({
         placeholder: props.placeholder,
         modules: {
           toolbar: toolbarOptions,
+          clipboard: {
+            matchVisual: false,
+          },
         },
+        formats: [
+          "header",
+          "blockquote",
+          "code-block",
+          "align",
+          "indent",
+          "bold",
+          "italic",
+          "underline",
+          "strike",
+          "list",
+          "bullet",
+          "color",
+          "background",
+        ],
       });
 
       // İlk değeri ayarla
       if (props.modelValue) {
-        quillInstance.root.innerHTML = props.modelValue;
+        setHTMLContent(props.modelValue);
       }
 
       // Değişiklikleri dinle
@@ -77,7 +95,31 @@ export default defineComponent({
         }
       });
     };
+    // HTML içeriğini Quill'e doğru şekilde ayarlama fonksiyonu
+    function setHTMLContent(html: string): void {
+      if (!quillInstance) return;
 
+      try {
+        // HTML'i Delta formatına dönüştür
+        const delta = quillInstance.clipboard.convert(html);
+        quillInstance.setContents(delta, "silent");
+      } catch (error) {
+        console.warn(
+          "HTML içeriği işlenirken hata oluştu, fallback olarak dangerouslyPasteHTML kullanılıyor:",
+          error
+        );
+        // Fallback olarak eski yöntemi kullan
+        quillInstance.clipboard.dangerouslyPasteHTML(html);
+      }
+    }
+
+    // HTML decode yardımcı fonksiyonu (artık kullanılmıyor ama geriye uyumluluk için bırakıldı)
+    function decodeHTML(html: string): string {
+      const parser = new DOMParser();
+      const decoded = parser.parseFromString(html, "text/html").documentElement
+        .textContent;
+      return decoded || html;
+    }
     onMounted(() => {
       initQuill();
     });
@@ -93,7 +135,7 @@ export default defineComponent({
       () => props.modelValue,
       (newValue) => {
         if (quillInstance && newValue !== quillInstance.root.innerHTML) {
-          quillInstance.root.innerHTML = newValue || "";
+          setHTMLContent(newValue || "");
         }
       }
     );
@@ -127,5 +169,112 @@ export default defineComponent({
 .quill-editor :deep(.ql-container) {
   border: none;
   font-family: inherit;
+}
+
+/* Başlık stilleri - daha iyi line-height */
+.quill-editor :deep(.ql-editor h1) {
+  line-height: 1.4 !important;
+  margin: 1.2em 0 0.8em 0 !important;
+}
+
+.quill-editor :deep(.ql-editor h2) {
+  line-height: 1.4 !important;
+  margin: 1.1em 0 0.7em 0 !important;
+}
+
+.quill-editor :deep(.ql-editor h3) {
+  line-height: 1.5 !important;
+  margin: 1em 0 0.6em 0 !important;
+}
+
+.quill-editor :deep(.ql-editor h4) {
+  line-height: 1.5 !important;
+  margin: 0.9em 0 0.5em 0 !important;
+}
+
+.quill-editor :deep(.ql-editor h5) {
+  line-height: 1.6 !important;
+  margin: 0.8em 0 0.4em 0 !important;
+}
+
+.quill-editor :deep(.ql-editor h6) {
+  line-height: 1.6 !important;
+  margin: 0.7em 0 0.3em 0 !important;
+}
+
+/* Liste stilleri - daha basit ve etkili yaklaşım */
+.quill-editor :deep(.ql-editor ul),
+.quill-editor :deep(.ql-editor ol) {
+  padding-left: 1.5em !important;
+  margin: 0.5em 0 !important;
+  list-style-position: outside !important;
+}
+
+.quill-editor :deep(.ql-editor ul li),
+.quill-editor :deep(.ql-editor ol li) {
+  margin: 0.3em 0 !important;
+  padding: 0.2em 0 !important;
+  line-height: 1.5 !important;
+}
+
+.quill-editor :deep(.ql-editor ul) {
+  list-style-type: disc !important;
+}
+
+.quill-editor :deep(.ql-editor ol) {
+  list-style-type: decimal !important;
+}
+
+/* Quill'in kendi liste sınıfları için de aynı stilleri uygula */
+.quill-editor :deep(.ql-editor .ql-list) {
+  padding-left: 1.5em !important;
+  margin: 0.5em 0 !important;
+}
+
+.quill-editor :deep(.ql-editor .ql-list.ql-bullet) {
+  list-style-type: disc !important;
+}
+
+.quill-editor :deep(.ql-editor .ql-list.ql-ordered) {
+  list-style-type: decimal !important;
+}
+
+.quill-editor :deep(.ql-editor .ql-list li) {
+  margin: 0.3em 0 !important;
+  padding: 0.2em 0 !important;
+  line-height: 1.5 !important;
+}
+
+/* İç içe listeler - basit tab sistemi */
+.quill-editor :deep(.ql-editor .ql-indent-1) {
+  padding-left: 2.5em !important;
+}
+
+.quill-editor :deep(.ql-editor .ql-indent-2) {
+  padding-left: 3.5em !important;
+}
+
+.quill-editor :deep(.ql-editor .ql-indent-3) {
+  padding-left: 4.5em !important;
+}
+
+.quill-editor :deep(.ql-editor .ql-indent-4) {
+  padding-left: 5.5em !important;
+}
+
+.quill-editor :deep(.ql-editor .ql-indent-5) {
+  padding-left: 6.5em !important;
+}
+
+.quill-editor :deep(.ql-editor .ql-indent-6) {
+  padding-left: 7.5em !important;
+}
+
+.quill-editor :deep(.ql-editor .ql-indent-7) {
+  padding-left: 8.5em !important;
+}
+
+.quill-editor :deep(.ql-editor .ql-indent-8) {
+  padding-left: 9.5em !important;
 }
 </style>

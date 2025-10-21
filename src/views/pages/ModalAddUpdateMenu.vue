@@ -689,11 +689,6 @@ watch(
 const onSubmit = async (values: any) => {
   const apiValues = { ...menuModel.value, ...values };
 
-  // Target'ı sadece Link ve Kapça tipi için gönder
-  if (apiValues.type !== 1 && apiValues.type !== 2) {
-    apiValues.target = "";
-  }
-
   // Type 2 (Kapça) ise translations'lardaki content'leri boş yap
   if (apiValues.type === 2 && apiValues.translations) {
     apiValues.translations.forEach((translation) => {
