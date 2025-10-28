@@ -42,8 +42,7 @@
                       :loading="loading"
                       :pagination="pagination"
                       :searchable="true"
-                      :exportable="true"
-                      :exportFields="exportFields"
+                      :exportable="false"
                       @onReset="onFilterReset"
                       @onSort="onSort"
                       @onRowClick="onRowClick"
@@ -167,15 +166,6 @@ const blogTableHeader = ref([
   },
 ]);
 
-// Export Fields
-const exportFields = ref([
-  { key: "title", label: "Başlık" },
-  { key: "categoryName", label: "Kategori" },
-  { key: "viewCount", label: "Görüntülenme" },
-  { key: "isActive", label: "Durum" },
-  { key: "createdAt", label: "Oluşturulma Tarihi" },
-]);
-
 // Reactive Data
 const blogDataTableRef = ref<null | typeof AsDataTable>(null);
 const loading = ref<boolean>(false);
@@ -194,13 +184,6 @@ const pagination = ref<IPagination>(defaultPagination);
 // Methods
 const getBlogs = async (model: IPagination = defaultPagination) => {
   try {
-    // Current language ID'yi store'dan al
-    const currentLanguage = store.getters["LanguageModule/selectedLanguage"];
-    if (currentLanguage) {
-      model.languageId = currentLanguage.id;
-      model.languageCode = currentLanguage.code;
-    }
-
     const result = await BlogService.getAll(model);
     if (result.result) {
       blogTableData.value = result.data || [];

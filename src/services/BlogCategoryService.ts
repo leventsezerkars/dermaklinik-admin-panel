@@ -2,6 +2,7 @@ import ApiService, { ApiResponse } from "@/core/services/ApiService";
 import * as yup from "yup";
 import { LanguageDto } from "./LanguageService";
 import { BlogDto } from "./BlogService";
+import { IPagination, defaultPagination } from "@/core/models/PageModel";
 
 // Model Tanımları
 export type BlogCategoryTranslationDto = {
@@ -81,8 +82,26 @@ export const updateBlogCategorySchema = yup.object({
 });
 
 export default class BlogCategoryService {
-  public static async getAll(): Promise<ApiResponse<BlogCategoryDto[]>> {
-    const result = await ApiService.get<BlogCategoryDto[]>("/api/BlogCategory");
+  public static async getAll(
+    params?: IPagination
+  ): Promise<ApiResponse<BlogCategoryDto[]>> {
+    if (!params) {
+      params = defaultPagination;
+    }
+
+    const queryParams = new URLSearchParams();
+    if (params.page) queryParams.append("page", params.page.toString());
+    if (params.take) queryParams.append("take", params.take.toString());
+    if (params.search) queryParams.append("search", params.search);
+    if (params.orderBy) queryParams.append("orderBy", params.orderBy);
+    if (params.direction) queryParams.append("direction", params.direction);
+
+    const queryString = queryParams.toString();
+    const url = queryString
+      ? `/api/BlogCategory?${queryString}`
+      : "/api/BlogCategory";
+
+    const result = await ApiService.get<BlogCategoryDto[]>(url);
     return result.data;
   }
 

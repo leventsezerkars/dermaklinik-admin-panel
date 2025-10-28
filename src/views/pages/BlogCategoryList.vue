@@ -42,11 +42,12 @@
                       :loading="loading"
                       :pagination="pagination"
                       :searchable="true"
-                      :exportable="true"
-                      :exportFields="exportFields"
+                      :exportable="false"
                       @onReset="onFilterReset"
                       @onSort="onSort"
                       @onRowClick="onRowClick"
+                      @onPageChange="onPageChange"
+                      @onItemsPerPageChange="onItemsPerPageChange"
                     >
                       <template v-slot:cell-actions="{ row }">
                         <div class="d-flex justify-content-end flex-shrink-0">
@@ -148,13 +149,6 @@ const blogCategoryTableHeader = ref([
   },
 ]);
 
-// Export Fields
-const exportFields = ref([
-  { key: "name", label: "Kategori Adı" },
-  { key: "isActive", label: "Durum" },
-  { key: "createdAt", label: "Oluşturulma Tarihi" },
-]);
-
 // Reactive Data
 const blogCategoryDataTableRef = ref<null | typeof AsDataTable>(null);
 const loading = ref<boolean>(false);
@@ -172,7 +166,7 @@ const pagination = ref<IPagination>(defaultPagination);
 // Methods
 const getBlogCategories = async (model: IPagination = defaultPagination) => {
   try {
-    const result = await BlogCategoryService.getAll();
+    const result = await BlogCategoryService.getAll(model);
     if (result.result) {
       blogCategoryTableData.value = result.data || [];
       pagination.value.total = result.totalCount || 0;
@@ -284,6 +278,12 @@ const onBlogCategorySubmitted = async () => {
 
 const onPageChange = (page: number) => {
   pagination.value.page = page;
+  refresh();
+};
+
+const onItemsPerPageChange = (itemsPerPage: number) => {
+  pagination.value.take = itemsPerPage;
+  pagination.value.page = 1;
   refresh();
 };
 

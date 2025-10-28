@@ -869,7 +869,7 @@ const loadGroups = async () => {
     console.log("State'e atanan gruplar:", groups.value);
   } catch (error) {
     console.error("Gruplar yüklenirken hata:", error);
-    alert("Gruplar yüklenirken hata oluştu: " + error);
+    SwalAlert.toast("Gruplar yüklenirken hata oluştu: " + error, "error");
     groups.value = []; // Hata durumunda boş array set et
   }
 };
@@ -920,7 +920,7 @@ const loadImages = async (groupId?: string) => {
     }
   } catch (error) {
     console.error("Resimler yüklenirken hata:", error);
-    alert("Resimler yüklenirken hata oluştu: " + error);
+    SwalAlert.toast("Resimler yüklenirken hata oluştu: " + error, "error");
     // Hata durumunda boş array set et
     if (groupId) {
       groupImages.value = [];
@@ -1014,7 +1014,7 @@ const saveGroup = async () => {
     cancelGroupEdit();
   } catch (error) {
     console.error("Grup kaydedilirken hata:", error);
-    alert("Grup kaydedilirken hata oluştu: " + error);
+    SwalAlert.toast("Grup kaydedilirken hata oluştu: " + error, "error");
   } finally {
     loading.value = false;
   }
@@ -1223,7 +1223,7 @@ const handleFileSelect = (event: Event) => {
 const uploadImage = async () => {
   // Düzenleme modunda değilse dosya seçimi zorunlu
   if (!editingImage.value && selectedFiles.value.length === 0) {
-    alert("Lütfen resim dosyası seçin");
+    SwalAlert.toast("Lütfen resim dosyası seçin", "error");
     return;
   }
 
@@ -1290,18 +1290,24 @@ const uploadImage = async () => {
           console.log("Resim başarıyla yüklendi:", imageData.Title);
         } catch (error) {
           console.error(`Resim yüklenirken hata (${file.name}):`, error);
-          alert(`Resim yüklenirken hata (${file.name}): ${error}`);
+          SwalAlert.toast(
+            `Resim yüklenirken hata (${file.name}): ${error}`,
+            "error"
+          );
         }
       }
     }
 
     // Resimleri yeniden yükle
     await refreshImages();
-
-    // Modal'ı kapat
-    if (uploadModalRef.value) {
-      uploadModalRef.value.hide();
+    try {
+      if (uploadModalRef.value) {
+        uploadModalRef.value.hide();
+      }
+    } catch (error) {
+      console.error("Modal kapatılırken hata:", error);
     }
+    // Modal'ı kapat
 
     // Form'u temizle (modal kapandıktan sonra)
     resetImageForm();
@@ -1309,7 +1315,7 @@ const uploadImage = async () => {
     console.log("İşlem tamamlandı");
   } catch (error) {
     console.error("Resim işlenirken hata:", error);
-    alert("Resim işlenirken hata oluştu: " + error);
+    SwalAlert.toast("Resim işlenirken hata oluştu: " + error, "error");
   } finally {
     loading.value = false;
   }
