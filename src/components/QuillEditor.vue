@@ -36,6 +36,7 @@ export default defineComponent({
   setup(props, { emit }) {
     const editor = ref<HTMLElement | null>(null);
     let quillInstance: Quill | null = null;
+    const isInitialized = ref(false);
 
     const height = computed<number>(() => {
       return props.size === "small" ? 300 : props.size === "medium" ? 500 : 700;
@@ -54,7 +55,9 @@ export default defineComponent({
     ];
 
     const initQuill = () => {
-      if (!editor.value) return;
+      if (!editor.value || isInitialized.value) return;
+
+      isInitialized.value = true;
 
       quillInstance = new Quill(editor.value, {
         theme: "snow",
@@ -62,7 +65,7 @@ export default defineComponent({
         modules: {
           toolbar: toolbarOptions,
           clipboard: {
-            matchVisual: false,
+            matchVisual: true, // HTML'i görsel olarak match et
           },
         },
         formats: [
@@ -87,18 +90,69 @@ export default defineComponent({
         setHTMLContent(props.modelValue);
       }
 
-      // Değişiklikleri dinle
-      quillInstance.on("text-change", () => {
-        if (quillInstance) {
+      // Değişiklikleri dinle - sadece kullanıcı değişikliklerinde emit et
+      quillInstance.on("text-change", (delta, oldDelta, source) => {
+        if (quillInstance && source === "user") {
           const html = quillInstance.root.innerHTML;
           emit("update:modelValue", html);
         }
       });
+
+      // HTML yapıştırmayı handle et - Quill'in kendi paste handler'ını kullan
+      const editorElement = editor.value.querySelector(".ql-editor");
+      if (editorElement) {
+        editorElement.addEventListener("paste", function (e: Event) {
+          const event = e as ClipboardEvent;
+          const clipboardData =
+            event.clipboardData || (window as any).clipboardData;
+          event.preventDefault();
+          event.stopPropagation();
+          event.stopImmediatePropagation();
+
+          if (clipboardData && quillInstance) {
+            const html = clipboardData.getData("text/html");
+            const text = clipboardData.getData("text/plain");
+
+            if (html || text) {
+              try {
+                // HTML varsa HTML'i kullan, yoksa text
+                const contentToPaste = html || text;
+
+                // Delta formatına dönüştür
+                const delta = quillInstance.clipboard.convert(contentToPaste);
+
+                // Selection'ı al
+                const selection = quillInstance.getSelection(true);
+
+                console.log("Selection:", selection);
+
+                // Delta'yı doğru pozisyona ekle
+
+                const index = selection
+                  ? selection.index
+                  : quillInstance.getLength();
+
+                // Şimdi pozisyona ekle - finalIndex'i kullan (selection varsa selection.index, yoksa son)
+                const insertDelta = new (Quill.import("delta"))();
+
+                // Her ops'i tek tek ekle
+                insertDelta.retain(index);
+                for (const op of delta.ops) {
+                  insertDelta.push(op);
+                }
+
+                quillInstance.updateContents(insertDelta, "user");
+              } catch (err) {
+                console.error("Paste hatası:", err);
+              }
+            }
+          }
+        });
+      }
     };
     // HTML içeriğini Quill'e doğru şekilde ayarlama fonksiyonu
     function setHTMLContent(html: string): void {
       if (!quillInstance) return;
-
       try {
         // HTML'i Delta formatına dönüştür
         const delta = quillInstance.clipboard.convert(html);
@@ -113,13 +167,6 @@ export default defineComponent({
       }
     }
 
-    // HTML decode yardımcı fonksiyonu (artık kullanılmıyor ama geriye uyumluluk için bırakıldı)
-    function decodeHTML(html: string): string {
-      const parser = new DOMParser();
-      const decoded = parser.parseFromString(html, "text/html").documentElement
-        .textContent;
-      return decoded || html;
-    }
     onMounted(() => {
       initQuill();
     });
@@ -133,9 +180,19 @@ export default defineComponent({
     // modelValue değiştiğinde editörü güncelle
     watch(
       () => props.modelValue,
-      (newValue) => {
-        if (quillInstance && newValue !== quillInstance.root.innerHTML) {
-          setHTMLContent(newValue || "");
+      (newValue, oldValue) => {
+        // Sadece gerçek değişiklik varsa ve Quill instance hazırsa güncelle
+        if (
+          quillInstance &&
+          newValue !== oldValue &&
+          newValue !== quillInstance.root.innerHTML
+        ) {
+          // setTimeout ile gecikme ekle - tab değişikliği sırasında önceki event'lerin tamamlanmasını bekle
+          setTimeout(() => {
+            if (quillInstance && newValue !== quillInstance.root.innerHTML) {
+              setHTMLContent(newValue || "");
+            }
+          }, 100);
         }
       }
     );

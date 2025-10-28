@@ -263,18 +263,23 @@ const deleteBlog = async (blog: BlogDto) => {
     loading.value = true;
     try {
       const deleteResult = await BlogService.delete(blog.id || "");
-      if (deleteResult.result) {
-        SwalAlert.toast("Blog yazısı başarıyla silindi");
+
+      // API'den gelen response'u kontrol et
+      // Boş result veya result: true ise başarılı
+      if (!deleteResult || deleteResult.result !== false) {
+        SwalAlert.toast("Blog yazısı başarıyla silindi", "success");
         refreshTrigger.value++;
-        refresh();
+        await refresh();
       } else {
         SwalAlert.toast(
-          "Blog yazısı silinirken hata oluştu: " + deleteResult.errorMessage,
+          "Blog yazısı silinirken hata oluştu: " +
+            (deleteResult?.errorMessage || "Bilinmeyen hata"),
           "error"
         );
       }
     } catch (error) {
-      SwalAlert.toast("Blog yazısı silinirken hata oluştu", "error");
+      console.error("Delete error:", error);
+      SwalAlert.toast("Blog yazısı silinirken hata oluştu: " + error, "error");
     } finally {
       loading.value = false;
     }
@@ -287,8 +292,10 @@ const showModal = () => {
 };
 
 const onBlogSubmitted = async () => {
+  console.log("onBlogSubmitted çağrıldı");
   refreshTrigger.value++;
   await refresh();
+  // AsDataTable'ı manuel olarak refresh et
 };
 
 const onPageChange = (page: number) => {
@@ -315,7 +322,9 @@ const onItemsPerPageChange = (itemsPerPage: number) => {
 };
 
 const refresh = async () => {
-  await getBlogs(pagination.value);
+  if (blogDataTableRef.value) {
+    blogDataTableRef.value.refresh();
+  }
 };
 
 // Lifecycle

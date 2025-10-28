@@ -451,15 +451,21 @@ const onSubmit = async (values: any) => {
       data = await BlogService.create(apiValues as CreateBlogDto);
     }
 
-    if (data.result) {
-      SwalAlert.toast("İşlem Başarılı");
+    // API'den gelen response'u kontrol et
+    // Boş result veya result: true ise başarılı
+    if (!data || data.result !== false) {
+      SwalAlert.toast("İşlem Başarılı", "success");
       hideModal(addBlogModalRef.value);
       emitted("submitted");
     } else {
-      SwalAlert.toast("Hata Oluştu! " + data.errorMessage, "error");
+      SwalAlert.toast(
+        "Hata Oluştu! " + (data?.errorMessage || "Bilinmeyen hata"),
+        "error"
+      );
     }
   } catch (error) {
-    SwalAlert.toast("İşlem sırasında hata oluştu", "error");
+    console.error("Submit error:", error);
+    SwalAlert.toast("İşlem sırasında hata oluştu: " + error, "error");
   } finally {
     loading.value = false;
   }
