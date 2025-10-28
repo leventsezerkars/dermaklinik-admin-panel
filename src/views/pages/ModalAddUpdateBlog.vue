@@ -131,6 +131,9 @@
                             )
                           "
                         />
+                        <small class="text-muted">
+                          Minimum 5 karakter olmalıdır
+                        </small>
                       </div>
 
                       <div class="fv-row mb-7">
@@ -197,6 +200,9 @@
                         <label class="required fs-6 fw-bold mb-2">
                           {{ language.name }} İçerik
                         </label>
+                        <small class="text-muted">
+                          Minimum 50 karakter olmalıdır
+                        </small>
                         <div class="content-editor-wrapper">
                           <QuillEditor
                             :key="`editor-${language.id}-${activeTab}`"
@@ -439,7 +445,86 @@ watch(
   { immediate: true }
 );
 
+// Form validasyon fonksiyonu
+const validateForm = (): boolean => {
+  // 1. Blog kategorisi kontrolü
+  if (!blogModel.value.categoryId) {
+    SwalAlert.toast("Lütfen bir blog kategorisi seçiniz!", "warning");
+    return false;
+  }
+
+  // 2. Dil bazlı içerik kontrolleri
+  const missingLanguagesSet = new Set<string>();
+  const shortTitles: string[] = [];
+  const shortContents: string[] = [];
+
+  languages.value.forEach((language) => {
+    const translation = getTranslationByLanguage(language.id);
+
+    // Başlık kontrolü (minimum 5 karakter)
+    if (!translation.title || translation.title.trim().length < 5) {
+      shortTitles.push(language.name);
+    }
+
+    // İçerik kontrolü (minimum 50 karakter)
+    if (!translation.content || translation.content.trim().length < 50) {
+      shortContents.push(language.name);
+    }
+
+    // Eğer başlık veya içerik boşsa eksik dil olarak işaretle
+    if (
+      !translation.title ||
+      !translation.content ||
+      translation.title.trim() === "" ||
+      translation.content.trim() === ""
+    ) {
+      missingLanguagesSet.add(language.name);
+    }
+  });
+
+  // Set'i array'e çevir
+  const missingLanguages = Array.from(missingLanguagesSet);
+
+  // Eksik dil içerikleri kontrolü
+  if (missingLanguages.length > 0) {
+    SwalAlert.toast(
+      `Aşağıdaki dillerde içerik eksik: ${missingLanguages.join(", ")}`,
+      "warning"
+    );
+    return false;
+  }
+
+  // Kısa başlık kontrolü
+  if (shortTitles.length > 0) {
+    SwalAlert.toast(
+      `Aşağıdaki dillerde başlık en az 5 karakter olmalı: ${shortTitles.join(
+        ", "
+      )}`,
+      "warning"
+    );
+    return false;
+  }
+
+  // Kısa içerik kontrolü
+  if (shortContents.length > 0) {
+    SwalAlert.toast(
+      `Aşağıdaki dillerde içerik en az 50 karakter olmalı: ${shortContents.join(
+        ", "
+      )}`,
+      "warning"
+    );
+    return false;
+  }
+
+  return true;
+};
+
 const onSubmit = async (values: any) => {
+  // Validasyon kontrolleri
+  if (!validateForm()) {
+    return;
+  }
+
   const apiValues = { ...blogModel.value, ...values };
   loading.value = true;
 

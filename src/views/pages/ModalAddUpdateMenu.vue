@@ -240,6 +240,9 @@
                           class="form-control"
                           :placeholder="`${language.name} menü adı`"
                         />
+                        <small class="text-muted">
+                          Minimum 3 karakter olmalıdır
+                        </small>
                       </div>
 
                       <div class="fv-row mb-7">
@@ -310,6 +313,9 @@
                         <label class="fs-6 fw-bold mb-2">
                           {{ language.name }} İçerik
                         </label>
+                        <small class="text-muted">
+                          Minimum 20 karakter olmalıdır
+                        </small>
                         <div class="content-editor-wrapper">
                           <QuillEditor
                             :key="`editor-${language.id}-${activeTab}`"
@@ -686,7 +692,93 @@ watch(
   }
 );
 
+// Form validasyon fonksiyonu
+const validateForm = (): boolean => {
+  // 1. Menü türü kontrolü
+  if (menuModel.value.type === undefined || menuModel.value.type === null) {
+    SwalAlert.toast("Lütfen bir menü türü seçiniz!", "warning");
+    return false;
+  }
+
+  // 2. Dil bazlı içerik kontrolleri
+  const missingLanguagesSet = new Set<string>();
+  const shortTitles: string[] = [];
+  const shortContents: string[] = [];
+
+  languages.value.forEach((language) => {
+    const translation = getTranslationByLanguage(language.id);
+
+    // Başlık kontrolü (minimum 3 karakter - menü için daha kısa)
+    if (!translation.title || translation.title.trim().length < 3) {
+      shortTitles.push(language.name);
+    }
+
+    // İçerik kontrolü (sadece Type 0 ve 1 için zorunlu, minimum 20 karakter)
+    if (
+      menuModel.value.type !== 2 &&
+      (!translation.content || translation.content.trim().length < 20)
+    ) {
+      shortContents.push(language.name);
+    }
+
+    // Eğer başlık boşsa eksik dil olarak işaretle
+    if (!translation.title || translation.title.trim() === "") {
+      missingLanguagesSet.add(language.name);
+    }
+
+    // Type 0 ve 1 için içerik kontrolü
+    if (
+      menuModel.value.type !== 2 &&
+      (!translation.content || translation.content.trim() === "")
+    ) {
+      missingLanguagesSet.add(language.name);
+    }
+  });
+
+  // Set'i array'e çevir
+  const missingLanguages = Array.from(missingLanguagesSet);
+
+  // Eksik dil içerikleri kontrolü
+  if (missingLanguages.length > 0) {
+    const message =
+      menuModel.value.type === 2
+        ? `Aşağıdaki dillerde menü adı eksik: ${missingLanguages.join(", ")}`
+        : `Aşağıdaki dillerde içerik eksik: ${missingLanguages.join(", ")}`;
+    SwalAlert.toast(message, "warning");
+    return false;
+  }
+
+  // Kısa başlık kontrolü
+  if (shortTitles.length > 0) {
+    SwalAlert.toast(
+      `Aşağıdaki dillerde menü adı en az 3 karakter olmalı: ${shortTitles.join(
+        ", "
+      )}`,
+      "warning"
+    );
+    return false;
+  }
+
+  // Kısa içerik kontrolü (sadece Type 0 ve 1 için)
+  if (menuModel.value.type !== 2 && shortContents.length > 0) {
+    SwalAlert.toast(
+      `Aşağıdaki dillerde içerik en az 20 karakter olmalı: ${shortContents.join(
+        ", "
+      )}`,
+      "warning"
+    );
+    return false;
+  }
+
+  return true;
+};
+
 const onSubmit = async (values: any) => {
+  // Validasyon kontrolleri
+  if (!validateForm()) {
+    return;
+  }
+
   const apiValues = { ...menuModel.value, ...values };
 
   // Type 2 (Kapça) ise translations'lardaki content'leri boş yap

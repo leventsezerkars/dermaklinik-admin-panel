@@ -103,6 +103,9 @@
                               class="form-control"
                               :placeholder="`${language.name} kategori adı`"
                             />
+                            <small class="text-muted">
+                              Minimum 3 karakter olmalıdır
+                            </small>
                           </div>
                         </div>
                       </div>
@@ -144,7 +147,7 @@
 
 <script setup lang="ts">
 import { ref, defineProps, computed, defineEmits, watch, onMounted } from "vue";
-import { ErrorMessage, Field, Form } from "vee-validate";
+import { Form } from "vee-validate";
 import { useStore } from "vuex";
 import SwalAlert from "@/core/helpers/swalalert";
 import { hideModal } from "@/core/helpers/dom";
@@ -152,9 +155,7 @@ import BlogCategoryService, {
   BlogCategoryDto,
   CreateBlogCategoryDto,
   UpdateBlogCategoryDto,
-  CreateBlogCategoryTranslationDto,
 } from "@/services/BlogCategoryService";
-import { LanguageDto } from "@/services/LanguageService";
 import { getFlagUrl } from "@/core/helpers/languageHelper";
 
 const store = useStore();
@@ -254,7 +255,58 @@ watch(
   { immediate: true }
 );
 
+// Form validasyon fonksiyonu
+const validateForm = (): boolean => {
+  // Dil bazlı içerik kontrolleri
+  const missingLanguagesSet = new Set<string>();
+  const shortNames: string[] = [];
+
+  languages.value.forEach((language) => {
+    const translation = getTranslationByLanguage(language.id);
+
+    // Kategori adı kontrolü (minimum 3 karakter)
+    if (!translation.name || translation.name.trim().length < 3) {
+      shortNames.push(language.name);
+    }
+
+    // Eğer kategori adı boşsa eksik dil olarak işaretle
+    if (!translation.name || translation.name.trim() === "") {
+      missingLanguagesSet.add(language.name);
+    }
+  });
+
+  // Set'i array'e çevir
+  const missingLanguages = Array.from(missingLanguagesSet);
+
+  // Eksik dil içerikleri kontrolü
+  if (missingLanguages.length > 0) {
+    SwalAlert.toast(
+      `Aşağıdaki dillerde kategori adı eksik: ${missingLanguages.join(", ")}`,
+      "warning"
+    );
+    return false;
+  }
+
+  // Kısa kategori adı kontrolü
+  if (shortNames.length > 0) {
+    SwalAlert.toast(
+      `Aşağıdaki dillerde kategori adı en az 3 karakter olmalı: ${shortNames.join(
+        ", "
+      )}`,
+      "warning"
+    );
+    return false;
+  }
+
+  return true;
+};
+
 const onSubmit = async (values: any) => {
+  // Validasyon kontrolleri
+  if (!validateForm()) {
+    return;
+  }
+
   const apiValues = { ...blogCategoryModel.value, ...values };
   loading.value = true;
 

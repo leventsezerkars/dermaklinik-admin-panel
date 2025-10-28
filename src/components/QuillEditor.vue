@@ -50,7 +50,7 @@ export default defineComponent({
       [{ indent: "-1" }, { indent: "+1" }],
       [{ align: [] }],
       ["link", "image"],
-      ["blockquote", "code-block"],
+      ["blockquote"],
       ["clean"],
     ];
 
@@ -71,7 +71,6 @@ export default defineComponent({
         formats: [
           "header",
           "blockquote",
-          "code-block",
           "align",
           "indent",
           "bold",
