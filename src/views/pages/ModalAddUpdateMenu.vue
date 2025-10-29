@@ -701,7 +701,8 @@ const validateForm = (): boolean => {
   }
 
   // 2. Dil bazlı içerik kontrolleri
-  const missingLanguagesSet = new Set<string>();
+  const missingTitleLanguagesSet = new Set<string>();
+  const missingContentLanguagesSet = new Set<string>();
   const shortTitles: string[] = [];
   const shortContents: string[] = [];
 
@@ -723,7 +724,7 @@ const validateForm = (): boolean => {
 
     // Eğer başlık boşsa eksik dil olarak işaretle
     if (!translation.title || translation.title.trim() === "") {
-      missingLanguagesSet.add(language.name);
+      missingTitleLanguagesSet.add(language.name);
     }
 
     // Type 0 ve 1 için içerik kontrolü
@@ -731,20 +732,29 @@ const validateForm = (): boolean => {
       menuModel.value.type !== 2 &&
       (!translation.content || translation.content.trim() === "")
     ) {
-      missingLanguagesSet.add(language.name);
+      missingContentLanguagesSet.add(language.name);
     }
   });
 
-  // Set'i array'e çevir
-  const missingLanguages = Array.from(missingLanguagesSet);
+  // Set'leri array'e çevir
+  const missingTitleLanguages = Array.from(missingTitleLanguagesSet);
+  const missingContentLanguages = Array.from(missingContentLanguagesSet);
 
-  // Eksik dil içerikleri kontrolü
-  if (missingLanguages.length > 0) {
-    const message =
-      menuModel.value.type === 2
-        ? `Aşağıdaki dillerde menü adı eksik: ${missingLanguages.join(", ")}`
-        : `Aşağıdaki dillerde içerik eksik: ${missingLanguages.join(", ")}`;
-    SwalAlert.toast(message, "warning");
+  // Eksik başlık kontrolü
+  if (missingTitleLanguages.length > 0) {
+    SwalAlert.toast(
+      `Aşağıdaki dillerde menü adı eksik: ${missingTitleLanguages.join(", ")}`,
+      "warning"
+    );
+    return false;
+  }
+
+  // Eksik içerik kontrolü (sadece Type 0 ve 1 için)
+  if (menuModel.value.type !== 2 && missingContentLanguages.length > 0) {
+    SwalAlert.toast(
+      `Aşağıdaki dillerde içerik eksik: ${missingContentLanguages.join(", ")}`,
+      "warning"
+    );
     return false;
   }
 

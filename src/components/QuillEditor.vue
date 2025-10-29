@@ -114,11 +114,8 @@ export default defineComponent({
 
             if (html || text) {
               try {
-                // HTML varsa HTML'i kullan, yoksa text
-                const contentToPaste = html || text;
-
                 // Delta formatına dönüştür
-                const delta = quillInstance.clipboard.convert(contentToPaste);
+                const delta = quillInstance.clipboard.convert(text);
 
                 // Selection'ı al
                 const selection = quillInstance.getSelection(true);
