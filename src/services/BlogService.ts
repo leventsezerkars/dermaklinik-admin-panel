@@ -181,6 +181,11 @@ export default class BlogService {
     return result.data;
   }
 
+  public static async hardDelete(id: string): Promise<ApiResponse> {
+    const result = await ApiService.delete(`/api/Blog/${id}/hard`);
+    return result.data;
+  }
+
   public static async incrementView(id: string): Promise<ApiResponse> {
     const result = await ApiService.post(
       `/api/Blog/${id}/increment-view`,

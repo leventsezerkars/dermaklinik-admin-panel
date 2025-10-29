@@ -238,31 +238,35 @@ const editBlog = (blog: BlogDto) => {
 
 const deleteBlog = async (blog: BlogDto) => {
   const result = await SwalAlert.confirm({
-    title: "Bu blog yazısını silmek istediğinizden emin misiniz?",
-    type: "question",
+    title: "Bu blog yazısını kalıcı olarak silmek istediğinizden emin misiniz?",
+    text: "Bu işlem geri alınamaz!",
+    type: "warning",
   });
 
   if (result.isConfirmed) {
     loading.value = true;
     try {
-      const deleteResult = await BlogService.delete(blog.id || "");
+      const deleteResult = await BlogService.hardDelete(blog.id || "");
 
       // API'den gelen response'u kontrol et
       // Boş result veya result: true ise başarılı
       if (!deleteResult || deleteResult.result !== false) {
-        SwalAlert.toast("Blog yazısı başarıyla silindi", "success");
+        SwalAlert.toast("Blog yazısı kalıcı olarak silindi", "success");
         refreshTrigger.value++;
         await refresh();
       } else {
         SwalAlert.toast(
-          "Blog yazısı silinirken hata oluştu: " +
+          "Blog yazısı kalıcı olarak silinirken hata oluştu: " +
             (deleteResult?.errorMessage || "Bilinmeyen hata"),
           "error"
         );
       }
     } catch (error) {
       console.error("Delete error:", error);
-      SwalAlert.toast("Blog yazısı silinirken hata oluştu: " + error, "error");
+      SwalAlert.toast(
+        "Blog yazısı kalıcı olarak silinirken hata oluştu: " + error,
+        "error"
+      );
     } finally {
       loading.value = false;
     }
